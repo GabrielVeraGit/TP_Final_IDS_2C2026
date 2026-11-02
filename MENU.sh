@@ -129,11 +129,18 @@ comprobar_api_aplicativo(){
     if [[ -d "./API_BACKEND/.venv" && -f "./API_BACKEND/.env" && -d "./APLICATIVO_FRONTEND/.venv" ]];then
 
         db_estructura_creada=$(source ./API_BACKEND/.env; echo "$DB_ESTRUCTURA_CREADA")
-        
-        if [[ "$db_estructura_creada" == "true" ]]; then
+        db_vivo=$(
+                source ./API_BACKEND/.env
+                export MYSQL_PWD="${DB_PASSWORD}"
+                mysqladmin -h "${DB_HOST}" -u "${DB_USER}" ping &>/dev/null
+                salida=$?
+                unset MYSQL_PWD
+                echo $salida
+                )
+        if [[ "${db_estructura_creada}" == "true" && "${db_vivo}" -eq 0 ]]; then
             lanzar_web="si"
         else
-            echo "La estructura del DB, no fue creada"
+            echo "La estructura del DB, no fue creada o conexion perdida con el motor"
         fi
     else
         echo "ERROR! procure haber hecho las anteriores opciones (1, 2 y 3)"
