@@ -1,0 +1,55 @@
+CREATE DATABASE IF NOT EXISTS cine_db;
+USE cine_db;
+
+
+CREATE TABLE IF NOT EXISTS USUARIOS (
+    id_usuarios INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    apellido VARCHAR(50) NOT NULL,
+    email VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(50) NOT NULL,
+    rol ENUM('admin', 'cliente') NOT NULL DEFAULT 'cliente'
+);
+
+CREATE TABLE IF NOT EXISTS SALAS (
+    id_sala INT AUTO_INCREMENT PRIMARY KEY,
+    numero VARCHAR(50) NOT NULL,
+    capacidad INT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS PELICULAS (
+    id_pelicula INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(50) NOT NULL,
+    sinopsis TEXT,
+    clasificacion VARCHAR(10),
+    genero VARCHAR(15),
+    omdb_id VARCHAR(500),
+    poster VARCHAR(500)
+);
+
+CREATE TABLE IF NOT EXISTS FUNCIONES (
+    id_funcion INT AUTO_INCREMENT PRIMARY KEY,
+    id_pelicula INT NOT NULL,
+    id_sala INT NOT NULL,
+    fecha_hora DATETIME NOT NULL,
+    precio_entrada DECIMAL(6,2) NOT NULL,
+    FOREIGN KEY (id_pelicula) REFERENCES PELICULAS(id_pelicula) ON DELETE CASCADE,
+    FOREIGN KEY (id_sala) REFERENCES SALAS(id_sala) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS RESERVAS (
+    id_reserva INT AUTO_INCREMENT PRIMARY KEY,
+    id_funcion INT NOT NULL,
+    id_usuario INT NOT NULL,
+    fecha_de_compra DATETIME DEFAULT CURRENT_TIMESTAMP,
+    qr VARCHAR(255) NOT NULL UNIQUE,
+    estado_compra ENUM('reservada', 'cancelada', 'usada') NOT NULL DEFAULT 'reservada',
+    monto_a_pagar DECIMAL(6,2) NOT NULL,
+    FOREIGN KEY (id_funcion) REFERENCES FUNCIONES(id_funcion) ON DELETE CASCADE,
+    FOREIGN KEY (id_usuario) REFERENCES USUARIOS(id_usuarios) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS ENTRADAS (
+    id_entrada INT AUTO_INCREMENT PRIMARY KEY,
+    id_reserva INT NOT NULL,
+    precio DECIMAL(6,2) NOT NULL,
+    FOREIGN KEY (id_reserva) REFERENCES RESERVAS(id_reserva) ON DELETE CASCADE
+)
