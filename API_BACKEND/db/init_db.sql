@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS USUARIOS (
     nombre VARCHAR(50) NOT NULL,
     apellido VARCHAR(50) NOT NULL,
     email VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(50) NOT NULL,
+    password VARCHAR(500) NOT NULL,
     rol ENUM('admin', 'cliente') NOT NULL DEFAULT 'cliente'
 );
 
@@ -25,12 +25,17 @@ CREATE TABLE IF NOT EXISTS SALAS (
 );
 CREATE TABLE IF NOT EXISTS PELICULAS (
     id_pelicula INT AUTO_INCREMENT PRIMARY KEY,
-    titulo VARCHAR(50) NOT NULL,
-    sinopsis TEXT,
+    titulo VARCHAR(100) NOT NULL,
+    anio INT NOT NULL,
     clasificacion VARCHAR(10),
-    genero VARCHAR(15),
-    omdb_id VARCHAR(500),
-    poster VARCHAR(500)
+    duracion VARCHAR(50),
+    genero VARCHAR(200),
+    director VARCHAR(200),
+    actores VARCHAR(200),
+    sinopsis TEXT,
+    lenguaje TEXT,
+    poster VARCHAR(500),
+    omdb_id VARCHAR(500)
 );
 
 CREATE TABLE IF NOT EXISTS FUNCIONES (
@@ -50,13 +55,14 @@ CREATE TABLE IF NOT EXISTS RESERVAS (
     fecha_de_compra DATETIME DEFAULT CURRENT_TIMESTAMP,
     qr VARCHAR(255) NOT NULL UNIQUE,
     estado_compra ENUM('reservada', 'cancelada', 'usada') NOT NULL DEFAULT 'reservada',
+    cant_entradas INT NOT NULL,
     monto_a_pagar DECIMAL(6,2) NOT NULL,
     FOREIGN KEY (id_funcion) REFERENCES FUNCIONES(id_funcion) ON DELETE CASCADE,
     FOREIGN KEY (id_usuario) REFERENCES USUARIOS(id_usuarios) ON DELETE CASCADE
 );
-CREATE TABLE IF NOT EXISTS ENTRADAS (
-    id_entrada INT AUTO_INCREMENT PRIMARY KEY,
-    id_reserva INT NOT NULL,
-    precio DECIMAL(6,2) NOT NULL,
-    FOREIGN KEY (id_reserva) REFERENCES RESERVAS(id_reserva) ON DELETE CASCADE
-)
+-- CREATE TABLE IF NOT EXISTS ENTRADAS (
+--     id_entrada INT AUTO_INCREMENT PRIMARY KEY,
+--     id_reserva INT NOT NULL,
+--     precio DECIMAL(6,2) NOT NULL,
+--     FOREIGN KEY (id_reserva) REFERENCES RESERVAS(id_reserva) ON DELETE CASCADE
+-- )
