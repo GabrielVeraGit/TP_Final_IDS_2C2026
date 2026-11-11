@@ -29,3 +29,15 @@ idna==3.20
 #Para el envio de emails 
 #(con .venv activo): pip install Flask-Mail
 Flask-Mail==0.10.0
+
+#para consumir la API externa de peliculas OMDb (https://www.omdbapi.com/)
+#  (con .venv activo): pip install requests
+requests==2.34.2
+certifi==2026.10.23
+charset-normalizer==3.5.2
+urllib3==2.8.0
+
+#para generar los codigos QR de las compras (pillow genera la imagen PNG)
+#  (con .venv activo): pip install qrcode pillow
+qrcode==8.2
+pillow==13.0.0
