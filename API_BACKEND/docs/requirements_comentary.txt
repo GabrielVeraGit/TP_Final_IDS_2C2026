@@ -25,3 +25,7 @@ dnspython==2.9.2
 #(con .venv activo): pip install email-validator
 email-validator==2.3.0
 idna==3.20
+
+#Para el envio de emails 
+#(con .venv activo): pip install Flask-Mail
+Flask-Mail==0.10.0
