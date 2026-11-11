@@ -15,7 +15,7 @@ app  = Flask(__name__)
 
 # Configuración de Flask-Mail (Tu motor de envíos)
 app.config['MAIL_SERVER'] = os.getenv("EMAIL_DOMINIO_REMITENTE")
-app.config['MAIL_PORT'] = int(os.getenv("EMAIL_PORT"))
+app.config['MAIL_PORT'] = int(os.getenv("EMAIL_PORT", 587))
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.getenv("EMAIL_REMITENTE")
 app.config['MAIL_PASSWORD'] = os.getenv("PASSWORD_REMITENTE") 
