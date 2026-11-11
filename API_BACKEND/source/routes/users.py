@@ -1,5 +1,9 @@
 from flask import Blueprint, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
 
+from source.validators.users import validando_campos_registro
+from source.services.users import buscar_rol_email, verificar_unicidad_email_usuarios, validando_dominio_email
+from source.repositories.users import append_usuarios
 user_bp = Blueprint('user', __name__)
 
 #informacion por request body
@@ -10,7 +14,28 @@ def get_user():
 
 @user_bp.route('/user/register', methods=['POST'])
 def register_user():
-    return jsonify({"mensaje": "usuario registrado"}), 200
+    error, data = validando_campos_registro()
+    if error: 
+        return data
+    error, resultado = validando_dominio_email(data)
+    if error:
+        return resultado
+    error, resultado = verificar_unicidad_email_usuarios(data)
+    if error:
+        return resultado
+    
+    error, resultado = buscar_rol_email(data)
+    if error:
+        return resultado
+
+    data["password"]=generate_password_hash(data["password"])
+    data["rol"]=resultado
+
+    error, resultado = append_usuarios(data)
+    if error:
+        return resultado
+
+    return jsonify({"message": "Usuario registrado"}), 201
 
 @user_bp.route('/user/login', methods=['POST'])
 def login_user():
