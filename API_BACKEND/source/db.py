@@ -45,3 +45,47 @@ def ejecutar_instruccion(query:str, valores:tuple=None, autocommit:bool=False)->
         conexion.close()
 
     return resultados
+
+
+def ejecutar_insercion(query:str, valores:tuple=None)->int:
+    conexion = obtener_db_conexion_manual()
+    cursor = conexion.cursor()
+
+    try:
+        cursor.execute(query, valores)
+        conexion.commit()
+        id_generado = cursor.lastrowid
+
+    except Exception as e:
+        conexion.rollback()
+        print(f"Error interno: {e}")
+        raise
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+    return id_generado
+
+def ejecutar_transaccion(operaciones, datos:dict):
+    conexion = obtener_db_conexion_manual()
+    cursor = conexion.cursor(dictionary=True, buffered=True)
+
+    try:
+        conexion.start_transaction()
+        error, resultado = operaciones(cursor, datos)
+        if error:
+            conexion.rollback()
+        else:
+            conexion.commit()
+
+    except Exception as e:
+        conexion.rollback()
+        print(f"Error interno: {e}")
+        raise
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+    return error, resultado
