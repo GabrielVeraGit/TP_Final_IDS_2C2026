@@ -15,7 +15,7 @@ user_bp = Blueprint('user', __name__)
 @user_bp.route('/user', methods=['GET'])
 @requiere_login
 def get_user(usuario):
-    return jsonify({"mensaje": "usuario obtenido"}), 200
+    return jsonify(usuario), 200
 
 @user_bp.route('/user/perfil', methods=['GET'])
 @requiere_login
