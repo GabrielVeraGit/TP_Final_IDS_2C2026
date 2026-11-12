@@ -1,5 +1,6 @@
 from flask import request
 from errors_code import ERROR_CLIENTE
+from source.utils.validaciones import validar_body_json, validar_texto, validar_email
 
 
 
@@ -29,3 +30,15 @@ def validando_campos_registro():
         if isinstance(e, KeyError):
             return True, ERROR_CLIENTE["BAD_REQUEST"](f"Falta campo obligatorio: {str(e)}")
         return True, ERROR_CLIENTE["BAD_REQUEST"](str(e))
+
+def validar_login(body):
+    error, body = validar_body_json(body)
+    if error:
+        return True, body
+    error, email = validar_email(body)
+    if error:
+        return True, email
+    error, password = validar_texto(body, "password", max_largo=100)
+    if error:
+        return True, password
+    return False, {"email": email, "password": password}

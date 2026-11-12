@@ -1,17 +1,29 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from sends_mails import send_email
 
-from source.validators.users import validando_campos_registro
+from source.auth import requiere_login, requiere_admin, obtener_token
+from source.validators.users import validando_campos_registro, validar_login
 from source.services.users import buscar_rol_email, verificar_unicidad_email_usuarios, validando_dominio_email
+from source.services.users import iniciar_sesion, cerrar_sesion, obtener_perfil, listar_usuarios
 from source.repositories.users import append_usuarios
+
 user_bp = Blueprint('user', __name__)
 
 #informacion por request body
 
 @user_bp.route('/user', methods=['GET'])
-def get_user():
+@requiere_login
+def get_user(usuario):
     return jsonify({"mensaje": "usuario obtenido"}), 200
+
+@user_bp.route('/user/perfil', methods=['GET'])
+@requiere_login
+def get_perfil(usuario):
+    error, resultado = obtener_perfil(usuario)
+    if error:
+        return resultado
+    return jsonify(resultado), 200
 
 @user_bp.route('/user/register', methods=['POST'])
 def register_user():
@@ -44,8 +56,28 @@ def register_user():
 
 @user_bp.route('/user/login', methods=['POST'])
 def login_user():
-    return jsonify({"mensaje": "usuario inicio sesion"}), 200
+    error, datos = validar_login(request.get_json(silent=True))
+    if error:
+        return datos
+    error, resultado = iniciar_sesion(datos["email"], datos["password"])
+    if error:
+        return resultado
+    resultado["message"] = "Usuario inicio sesion"
+    return jsonify(resultado), 200
+
 
 @user_bp.route('/user/logout', methods=['POST'])
-def logout_user():
-    return jsonify({"mensaje": "usuario cerro sesion"}), 200
+@requiere_login
+def logout_user(usuario):
+    error, token = obtener_token()
+    cerrar_sesion(token)
+    return jsonify({"message": "Usuario cerro sesion"}), 200
+
+#Lista usuarios a admin
+@user_bp.route('/users', methods=['GET'])
+@requiere_admin
+def get_users():
+    error, resultado = listar_usuarios()
+    if error:
+        return resultado
+    return jsonify(resultado), 200

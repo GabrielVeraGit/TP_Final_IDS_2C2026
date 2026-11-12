@@ -2,6 +2,10 @@ from errors_code import ERROR_CLIENTE
 from vars_validacion import DOMINIOS_MAIL_PERMITIDOS
 from source.repositories.users import obtener_emails_admins, obtener_usuarios_filtros
 from email_validator import validate_email, EmailNotValidError
+import secrets
+from werkzeug.security import check_password_hash
+from source.utils import config
+from source.repositories import users as repo
 
 def validando_dominio_email(usr:dict):
     correo=usr["email"]
@@ -36,3 +40,32 @@ def verificar_unicidad_email_usuarios(usr:dict):
     if len(resultado)==0:
         return False, None
     return True, ERROR_CLIENTE["CONFLICT"]("El email ya existe en DB")
+
+def iniciar_sesion(email: str, password: str):
+    usuario = repo.obtener_usuario_con_password_por_email(email)
+    if usuario is None or not check_password_hash(usuario["password"], password):
+        return True, ERROR_CLIENTE["UNAUTHORIZED"]("Email o password incorrectos")
+
+    repo.eliminar_sesiones_expiradas()
+    token = secrets.token_urlsafe(48)
+    repo.insertar_sesion(token, usuario["id_usuario"], config.HORAS_DURACION_SESION)
+
+    usuario.pop("password")
+    return False, {"token": token, "expira_en_horas": config.HORAS_DURACION_SESION, "usuario": usuario}
+
+
+def cerrar_sesion(token: str):
+    repo.eliminar_sesion(token)
+    return False, None
+
+
+def obtener_perfil(usuario: dict):
+    return False, {
+        "usuario": usuario,
+        "consumos": repo.obtener_resumen_consumos(usuario["id_usuario"]),
+        "peliculas_vistas": repo.obtener_peliculas_vistas(usuario["id_usuario"]),
+    }
+
+
+def listar_usuarios():
+    return False, repo.obtener_usuarios()
