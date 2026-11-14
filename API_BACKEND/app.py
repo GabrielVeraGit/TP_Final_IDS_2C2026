@@ -1,12 +1,11 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
 from dotenv import load_dotenv
 from flask import Flask
-from flask_mail import Mail
+
 from werkzeug.exceptions import HTTPException
-from flask_jwt_extended import JWTManager #tokens
-from source import JWT as jw
+from source import extend_email, extend_jwt
 
 from source.routes.users import user_bp
 from source.routes.peliculas import pelicula_bp
@@ -35,21 +34,10 @@ app.json.sort_keys = False
 app.json.ensure_ascii = False
 
 # Configuración Mail 
-app.config['MAIL_SERVER'] = os.getenv("EMAIL_DOMINIO_REMITENTE")
-app.config['MAIL_PORT'] = int(os.getenv("EMAIL_PORT", 587))
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.getenv("EMAIL_REMITENTE")
-app.config['MAIL_PASSWORD'] = os.getenv("PASSWORD_REMITENTE") 
-app.config['MAIL_DEFAULT_SENDER'] = (os.getenv("DB_NAME"), os.getenv("EMAIL_REMITENTE"))
-
-mail = Mail(app)
+extend_email.config(app)
 
 #Configuracion Tokens
-app.config["JWT_SECRET_KEY"] = os.getenv("PASSWORD_REMITENTE") #clave super secreta
-app.config["JWT_TOKEN_LOCATION"] = ["cookies"] #enves de leer y enviar tokens, seran cookies
-app.config["JWT_COOKIE_CSRF_PROTECT"] = False
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=1)#tiempo de duracion de la cookie
-jwt = JWTManager(app)
+extend_jwt.config(app)
 
 # Blueprints
 app.register_blueprint(user_bp,     url_prefix="/api")
@@ -61,19 +49,7 @@ app.register_blueprint(reserva_bp,  url_prefix="/api")
 
 #Api externa
 #app.before_request(verificar_api_key)
-#Enpoints Errores 
-
-@jwt.expired_token_loader
-def token_expirado(jwt_header, jwt_payload):
-    json, code_n = ERROR_CLIENTE["UNAUTHORIZED"]("Token caducado, por favor inicia sesión nuevamente.")
-    respuesta = jw.eliminar_cookie(json)
-    return respuesta, code_n
-
-@jwt.unauthorized_loader
-def token_ausente(reason):
-    return ERROR_CLIENTE["UNAUTHORIZED"]("No se mando un token")
     
-
 @app.errorhandler(HTTPException)
 def manejar_error_http(error:HTTPException):
     if error.code == 404:

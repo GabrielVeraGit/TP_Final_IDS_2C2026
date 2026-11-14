@@ -1,11 +1,11 @@
 from flask import Blueprint, jsonify
 
-from source.sends_mails import send_email
+from source.extend_email import send_email
 from source.validators import users as val
 from source.services import users as serv
 from source.repositories import users as repo
 
-from source import JWT as jwt
+from source import extend_jwt
 from flask_jwt_extended import jwt_required #tokens
 
 user_bp = Blueprint('user', __name__)
@@ -54,20 +54,20 @@ def login_user():
         return resultado
     #hasta aca, credenciales correctas, y el registo del usuario
     
-    token = jwt.crear_token(registro)
-    respuesta = jwt.crear_cookie(token)
+    token = extend_jwt.crear_token(registro)
+    respuesta = extend_jwt.crear_cookie(token)
     return respuesta, 201
 
 @user_bp.route('/user/logout', methods=['POST'])
 @jwt_required()
 def logout_user():
-    respuesta = jwt.eliminar_cookie()
+    respuesta = extend_jwt.eliminar_cookie()
     return respuesta, 201
 
 @user_bp.route('/user/perfil', methods=['GET'])#para clientes
 @jwt_required()
 def get_perfil():
-    identificador, data_extra = jwt.obtener_informacion_token()
+    identificador, data_extra = extend_jwt.obtener_informacion_token()
     error, resultado = serv.verificar_rol_permitido(data_extra, "cliente")
     if error:
         return resultado
@@ -79,7 +79,7 @@ def get_perfil():
 @user_bp.route('/users', methods=['GET'])#Lista usuarios a admin
 @jwt_required()
 def get_users():
-    identificador, data_extra = jwt.obtener_informacion_token()
+    identificador, data_extra = extend_jwt.obtener_informacion_token()
     error, resultado = serv.verificar_rol_permitido(data_extra, "admin")
     if error:
         return resultado
