@@ -1,11 +1,9 @@
+from flask import jsonify
 from errors_code import ERROR_CLIENTE
-from vars_validacion import DOMINIOS_MAIL_PERMITIDOS
-from source.repositories.users import obtener_emails_admins, obtener_usuarios_filtros
-from email_validator import validate_email, EmailNotValidError
-import secrets
-from werkzeug.security import check_password_hash
-from source.utils import config
+from source.utils.validaciones import DOMINIOS_MAIL_PERMITIDOS
 from source.repositories import users as repo
+from email_validator import validate_email, EmailNotValidError
+from werkzeug.security import generate_password_hash, check_password_hash
 
 def validando_dominio_email(usr:dict):
     correo=usr["email"]
@@ -19,10 +17,9 @@ def validando_dominio_email(usr:dict):
     except EmailNotValidError as e:
         return True, ERROR_CLIENTE["BAD_REQUEST"](f"Direccion de correo no valida, motivo: {str(e)}")
 
-
-def buscar_rol_email(usr:dict):
+def buscar_rol_registro(usr:dict):
     email=usr["email"]
-    error, resultado =obtener_emails_admins()
+    error, resultado = repo.obtener_emails_admins()
     if error:
         return True, resultado
     
@@ -33,7 +30,7 @@ def buscar_rol_email(usr:dict):
     return False, tipo_rol
 
 def verificar_unicidad_email_usuarios(usr:dict):
-    error, resultado = obtener_usuarios_filtros({"email":usr["email"]})
+    error, resultado = repo.obtener_usuarios_filtros({"email":usr["email"]})
     if error:
         return True, resultado
     
@@ -41,31 +38,45 @@ def verificar_unicidad_email_usuarios(usr:dict):
         return False, None
     return True, ERROR_CLIENTE["CONFLICT"]("El email ya existe en DB")
 
-def iniciar_sesion(email: str, password: str):
-    usuario = repo.obtener_usuario_con_password_por_email(email)
-    if usuario is None or not check_password_hash(usuario["password"], password):
-        return True, ERROR_CLIENTE["UNAUTHORIZED"]("Email o password incorrectos")
 
-    repo.eliminar_sesiones_expiradas()
-    token = secrets.token_urlsafe(48)
-    repo.insertar_sesion(token, usuario["id_usuario"], config.HORAS_DURACION_SESION)
+def encriptar_password(password):
+    password_encriptada = generate_password_hash(password)
+    return password_encriptada
+def verificar_igualdad_password(hash_password:str, password:str):
+    if check_password_hash(hash_password, password):
+        return False, None
+    return True, ERROR_CLIENTE["UNAUTHORIZED"]("contrasenia incorrecta")
 
-    usuario.pop("password")
-    return False, {"token": token, "expira_en_horas": config.HORAS_DURACION_SESION, "usuario": usuario}
-
-
-def cerrar_sesion(token: str):
-    repo.eliminar_sesion(token)
-    return False, None
+def verificar_rol_permitido(data_extra:dict, rol_permitido:str):
+    if data_extra["rol"] == rol_permitido:
+        return False, None
+    return True, ERROR_CLIENTE["FORBIDDEN"](f"Usted no es {rol_permitido}")
 
 
-def obtener_perfil(usuario: dict):
-    return False, {
+def obtener_perfil(identificador:str):
+    error, registro = repo.obtener_usuarios_filtros({"email":identificador})
+    if error:
+        return True, registro
+    usuario=registro[0]
+    resultado = {
         "usuario": usuario,
         "consumos": repo.obtener_resumen_consumos(usuario["id_usuario"]),
         "peliculas_vistas": repo.obtener_peliculas_vistas(usuario["id_usuario"]),
     }
-
+    return False, resultado
 
 def listar_usuarios():
-    return False, repo.obtener_usuarios()
+    error, registros = repo.obtener_usuarios_filtros(con_password=False)
+    if error:
+        return True, registros
+    return False, registros
+
+
+def obtener_usuario_login(usr:dict):
+    error, resultado = repo.obtener_usuarios_filtros({"email":usr["email"]}, con_password=True)
+    if error:
+        return True, resultado
+    
+    if len(resultado)==0:
+        return True, ERROR_CLIENTE["NOT_FOUND"]("El email no esta registrado")
+    return False, resultado[0]

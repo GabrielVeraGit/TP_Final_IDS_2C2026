@@ -22,9 +22,13 @@ def append_usuarios(usr:dict):
     except Exception as e:
         return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB append_usuario, {str(e)}")
 
-#filtros: clave=alguna columna de la tabla; valor=filtros para la query, si no se manda, obtiene todos los registros
-def obtener_usuarios_filtros(filtros:dict=None):
-    query = f"SELECT * FROM USUARIOS"
+#obtiene los usuarios(todas las columnas), con filtros de registros "WHERE id_usuario > 4 AND ..."
+#filtros: clave=la columna filtro; valor=el dato filtro
+def obtener_usuarios_filtros(filtros:dict=None, con_password:bool=False)-> list[dict]:
+    if con_password:
+        query = f"SELECT * FROM USUARIOS"
+    else:
+        query = f"SELECT id_usuario, nombre, apellido, email, rol FROM USUARIOS"
     valores=()
     if filtros:
         columnas, valores=zip(*filtros.items())
@@ -32,7 +36,9 @@ def obtener_usuarios_filtros(filtros:dict=None):
         columnas=" AND ".join(columnas)
 
         query=f"{query} WHERE {columnas};"
-    
+    else:
+        query=f"{query};"
+        
     try:
         if valores:
             resultado=ejecutar_instruccion(query, valores)
@@ -41,41 +47,6 @@ def obtener_usuarios_filtros(filtros:dict=None):
         return False, resultado
     except Exception as e:
         return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB obtener_usuarios_filtros, {str(e)}")
-
-COLUMNAS_USUARIO = "id_usuarios AS id_usuario, nombre, apellido, email, rol"
-
-def obtener_usuario_con_password_por_email(email: str) -> dict:
-    query = f"SELECT {COLUMNAS_USUARIO}, password FROM USUARIOS WHERE email = %s"
-    resultado = ejecutar_instruccion(query, (email,))
-    return resultado[0] if resultado else None
-
-
-def obtener_usuarios() -> list[dict]:
-    query = f"SELECT {COLUMNAS_USUARIO} FROM USUARIOS ORDER BY id_usuarios"
-    return ejecutar_instruccion(query)
-
-
-def insertar_sesion(token: str, id_usuario: int, horas_duracion: int) -> None:
-    query = """INSERT INTO SESIONES (token, id_usuario, fecha_expiracion)
-               VALUES (%s, %s, DATE_ADD(NOW(), INTERVAL %s HOUR))"""
-    ejecutar_instruccion(query, (token, id_usuario, horas_duracion), autocommit=True)
-
-
-def obtener_usuario_por_token(token: str) -> dict:
-    query = f"""SELECT {COLUMNAS_USUARIO}
-                FROM SESIONES S JOIN USUARIOS U ON U.id_usuarios = S.id_usuario
-                WHERE S.token = %s AND S.fecha_expiracion > NOW()"""
-    resultado = ejecutar_instruccion(query, (token,))
-    return resultado[0] if resultado else None
-
-
-def eliminar_sesion(token: str) -> None:
-    ejecutar_instruccion("DELETE FROM SESIONES WHERE token = %s", (token,), autocommit=True)
-
-
-def eliminar_sesiones_expiradas() -> None:
-    ejecutar_instruccion("DELETE FROM SESIONES WHERE fecha_expiracion <= NOW()", autocommit=True)
-
 
 def obtener_resumen_consumos(id_usuario: int) -> dict:
     query = """SELECT COUNT(*) AS cantidad_compras,

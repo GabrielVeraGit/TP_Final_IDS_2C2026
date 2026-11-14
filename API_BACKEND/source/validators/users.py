@@ -2,8 +2,6 @@ from flask import request
 from errors_code import ERROR_CLIENTE
 from source.utils.validaciones import validar_body_json, validar_texto, validar_email
 
-
-
 def validando_solo_letras(campo:str):
     if not campo.replace(" ","").isalpha():
         return True, ERROR_CLIENTE["BAD_REQUEST"](f"El campo '{campo}' debe contener solo letras")
@@ -31,7 +29,8 @@ def validando_campos_registro():
             return True, ERROR_CLIENTE["BAD_REQUEST"](f"Falta campo obligatorio: {str(e)}")
         return True, ERROR_CLIENTE["BAD_REQUEST"](str(e))
 
-def validar_login(body):
+def validar_login():
+    body = request.get_json(silent=True)
     error, body = validar_body_json(body)
     if error:
         return True, body
