@@ -1,83 +1,89 @@
-from flask import Blueprint, jsonify, request
-from werkzeug.security import generate_password_hash, check_password_hash
-from sends_mails import send_email
+from flask import Blueprint, jsonify
 
-from source.auth import requiere_login, requiere_admin, obtener_token
-from source.validators.users import validando_campos_registro, validar_login
-from source.services.users import buscar_rol_email, verificar_unicidad_email_usuarios, validando_dominio_email
-from source.services.users import iniciar_sesion, cerrar_sesion, obtener_perfil, listar_usuarios
-from source.repositories.users import append_usuarios
+from source.sends_mails import send_email
+from source.validators import users as val
+from source.services import users as serv
+from source.repositories import users as repo
+
+from source import JWT as jwt
+from flask_jwt_extended import jwt_required #tokens
 
 user_bp = Blueprint('user', __name__)
 
-#informacion por request body
-
-@user_bp.route('/user', methods=['GET'])
-@requiere_login
-def get_user(usuario):
-    return jsonify(usuario), 200
-
-@user_bp.route('/user/perfil', methods=['GET'])
-@requiere_login
-def get_perfil(usuario):
-    error, resultado = obtener_perfil(usuario)
-    if error:
-        return resultado
-    return jsonify(resultado), 200
-
 @user_bp.route('/user/register', methods=['POST'])
 def register_user():
-    error, data = validando_campos_registro()
+    error, data = val.validando_campos_registro()
     if error: 
         return data
-    error, resultado = validando_dominio_email(data)
+    error, resultado = serv.validando_dominio_email(data)
     if error:
         return resultado
-    error, resultado = verificar_unicidad_email_usuarios(data)
+    error, resultado = serv.verificar_unicidad_email_usuarios(data)
     if error:
         return resultado
     
-    error, resultado = buscar_rol_email(data)
+    error, resultado = serv.buscar_rol_registro(data)
     if error:
         return resultado
 
-    data["password"]=generate_password_hash(data["password"])
+    data["password"] = serv.encriptar_password(data["password"])
     data["rol"]=resultado
 
+    error, resultado = repo.append_usuarios(data)
+    if error:
+        return resultado
+    
     error, resultado = send_email("Este es un asunto, BIEMBENIDO",[data["email"]], "este es el cuerpo")
     if error:
         return resultado
     
-    error, resultado = append_usuarios(data)
-    if error:
-        return resultado
-
     return jsonify({"message": "Usuario registrado, revise su bandeja de entrada"}), 201
 
 @user_bp.route('/user/login', methods=['POST'])
 def login_user():
-    error, datos = validar_login(request.get_json(silent=True))
+    error, datos = val.validar_login()
     if error:
         return datos
-    error, resultado = iniciar_sesion(datos["email"], datos["password"])
+  
+    error, registro = serv.obtener_usuario_login(datos)
+    if error:
+        return registro
+ 
+    error, resultado = serv.verificar_igualdad_password(registro["password"], datos["password"])
     if error:
         return resultado
-    resultado["message"] = "Usuario inicio sesion"
-    return jsonify(resultado), 200
-
+    #hasta aca, credenciales correctas, y el registo del usuario
+    
+    token = jwt.crear_token(registro)
+    respuesta = jwt.crear_cookie(token)
+    return respuesta, 201
 
 @user_bp.route('/user/logout', methods=['POST'])
-@requiere_login
-def logout_user(usuario):
-    error, token = obtener_token()
-    cerrar_sesion(token)
-    return jsonify({"message": "Usuario cerro sesion"}), 200
+@jwt_required()
+def logout_user():
+    respuesta = jwt.eliminar_cookie()
+    return respuesta, 201
 
-#Lista usuarios a admin
-@user_bp.route('/users', methods=['GET'])
-@requiere_admin
-def get_users():
-    error, resultado = listar_usuarios()
+@user_bp.route('/user/perfil', methods=['GET'])#para clientes
+@jwt_required()
+def get_perfil():
+    identificador, data_extra = jwt.obtener_informacion_token()
+    error, resultado = serv.verificar_rol_permitido(data_extra, "cliente")
+    if error:
+        return resultado
+    error, resultado = serv.obtener_perfil(identificador)
     if error:
         return resultado
     return jsonify(resultado), 200
+
+@user_bp.route('/users', methods=['GET'])#Lista usuarios a admin
+@jwt_required()
+def get_users():
+    identificador, data_extra = jwt.obtener_informacion_token()
+    error, resultado = serv.verificar_rol_permitido(data_extra, "admin")
+    if error:
+        return resultado
+    error, registros = serv.listar_usuarios()
+    if error:
+        return registros
+    return jsonify(registros), 200

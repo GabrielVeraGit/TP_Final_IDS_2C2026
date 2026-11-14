@@ -41,3 +41,8 @@ urllib3==2.8.0
 #  (con .venv activo): pip install qrcode pillow
 qrcode==8.2
 pillow==13.0.0
+
+#para generar los tokens y cookies
+#(con .venv activo): pip install Flask-JWT-Extended
+PyJWT==2.15.1
+Flask-JWT-Extended==4.7.4

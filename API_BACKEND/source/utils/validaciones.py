@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 from errors_code import ERROR_CLIENTE
 
+DOMINIOS_MAIL_PERMITIDOS=("gmail.com", "yahoo.com", "hotmail.com", "fi.uba.ar")
 FORMATOS_FECHA_HORA = ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M", "%Y-%m-%d")
 PATRON_EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 

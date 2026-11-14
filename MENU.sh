@@ -77,7 +77,7 @@ crear_ingresar_env(){
         regex_password="^[a-z]{16}$"
         password_incorrecta="si"
         while [[ "${password_incorrecta}" == "si" ]];do
-            read -p "EMAIL_REMITENTE=" pass_remitente
+            read -p "PASSWORD_REMITENTE=" pass_remitente
             if [[ "$pass_remitente" =~ $regex_password ]]; then
                 password_incorrecta="no"
             else
