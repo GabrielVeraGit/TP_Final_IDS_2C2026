@@ -1,12 +1,10 @@
 from flask import Blueprint, jsonify
 
-from source.extend_email import send_email
 from source.validators import users as val
 from source.services import users as serv
 from source.repositories import users as repo
 
-from source import extend_jwt
-from flask_jwt_extended import jwt_required #tokens
+from source import extend_jwt, extend_email
 
 user_bp = Blueprint('user', __name__)
 
@@ -33,7 +31,7 @@ def register_user():
     if error:
         return resultado
     
-    error, resultado = send_email("Este es un asunto, BIEMBENIDO",[data["email"]], "este es el cuerpo")
+    error, resultado = extend_email.send_email("Este es un asunto, BIEMBENIDO",[data["email"]], "este es el cuerpo")
     if error:
         return resultado
     
@@ -59,31 +57,32 @@ def login_user():
     return respuesta, 201
 
 @user_bp.route('/user/logout', methods=['POST'])
-@jwt_required()
+@extend_jwt.seguro()
 def logout_user():
     respuesta = extend_jwt.eliminar_cookie()
     return respuesta, 201
 
 @user_bp.route('/user/perfil', methods=['GET'])#para clientes
-@jwt_required()
+@extend_jwt.seguro()
 def get_perfil():
-    identificador, data_extra = extend_jwt.obtener_informacion_token()
-    error, resultado = serv.verificar_rol_permitido(data_extra, "cliente")
+    error, resultado = extend_jwt.verificar_rol_permitido("cliente")
     if error:
         return resultado
+
+    identificador, data_extra = extend_jwt.obtener_informacion_token()
     error, resultado = serv.obtener_perfil(identificador)
     if error:
         return resultado
     return jsonify(resultado), 200
 
 @user_bp.route('/users', methods=['GET'])#Lista usuarios a admin
-@jwt_required()
+@extend_jwt.seguro()
 def get_users():
-    identificador, data_extra = extend_jwt.obtener_informacion_token()
-    error, resultado = serv.verificar_rol_permitido(data_extra, "admin")
+    error, resultado = extend_jwt.verificar_rol_permitido("admin")
     if error:
         return resultado
+    
     error, registros = serv.listar_usuarios()
     if error:
         return registros
-    return jsonify(registros), 200
+    return jsonify({"registros":registros}), 200

@@ -84,11 +84,25 @@ crear_ingresar_env(){
                 echo "La contraseña NO es válida. Debe tener 16 letras minúsculas y sin espacios."
             fi
         done
+
+        regex_duracion_token="^[1-9][0-9]*$"
+        duracion_token_incorrecta="si"
+        while [[ "${duracion_token_incorrecta}" == "si" ]];do
+            read -p "TOKEN_DURACION_MIN=" duracion_token
+            if [[ "$duracion_token" =~ $regex_duracion_token ]]; then
+                duracion_token_incorrecta="no"
+            else
+                echo "La duracion debe ser solo numeros, expresion en minutos"
+            fi
+        done
         cp ./.env.example ./API_BACKEND/.env
         sed -i "s/DB_USER=tu_usuario_aqui/DB_USER=${db_user}/" ./API_BACKEND/.env
         sed -i "s/DB_PASSWORD=tu_contrasenia_aqui/DB_PASSWORD=${db_password}/" ./API_BACKEND/.env
         sed -i "s/EMAIL_REMITENTE=tu_email_aqui/EMAIL_REMITENTE=${email}/" ./API_BACKEND/.env
         sed -i "s/PASSWORD_REMITENTE=codigo_16_caracteres/PASSWORD_REMITENTE=${pass_remitente}/" ./API_BACKEND/.env
+
+        sed -i "s/TOKEN_KEY_CODIFICACION=key_super_secreta/TOKEN_KEY_CODIFICACION=${pass_remitente}/" ./API_BACKEND/.env
+        sed -i "s/TOKEN_DURACION_MIN=duracion_minutos/TOKEN_DURACION_MIN=${duracion_token}/" ./API_BACKEND/.env
 
         grep "PORT_APLICATIVO_FRONTEND" ./.env.example >> ./APLICATIVO_FRONTEND/.env
         echo "EXITO!"

@@ -2,9 +2,15 @@ import os
 from datetime import timedelta
 from flask import jsonify
 from errors_code import ERROR_CLIENTE
-from flask_jwt_extended import JWTManager, create_access_token, set_access_cookies, unset_jwt_cookies, get_jwt_identity, get_jwt #tokens
-jwt = JWTManager()
+from flask_jwt_extended import (JWTManager, jwt_required,
+    create_access_token, 
+    set_access_cookies, 
+    unset_jwt_cookies, 
+    get_jwt_identity, 
+    get_jwt) #tokens
 
+jwt = JWTManager()
+seguro = jwt_required
 def crear_token(registro:dict)->str: #registro tiene TODA la info del usuario
     data_extra={"id_usuario":registro["id_usuario"], 
                 "email":registro["email"], 
@@ -32,13 +38,19 @@ def obtener_informacion_token():
     return identificador, data_extra
 
 def config(app):
-    app.config["JWT_SECRET_KEY"] = os.getenv("PASSWORD_REMITENTE") #clave super secreta
+    app.config["JWT_SECRET_KEY"] = os.getenv("TOKEN_KEY_CODIFICACION") #clave super secreta
     app.config["JWT_TOKEN_LOCATION"] = ["cookies"] #enves de leer y enviar tokens, seran cookies
     app.config["JWT_COOKIE_CSRF_PROTECT"] = False
-    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=1)#tiempo de duracion de la cookie
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes= int(os.getenv("TOKEN_DURACION_MIN")))#tiempo de duracion del token
+    app.config["JWT_SESSION_COOKIE"] = False  # Sincroniza la expiración de la cookie con el token
     
     jwt.init_app(app)#resultado igual a jwt = JWTManager(app)
 
+def verificar_rol_permitido(rol_permitido:str):
+    identificador, data_extra = obtener_informacion_token()
+    if data_extra["rol"] == rol_permitido:
+        return False, None
+    return True, ERROR_CLIENTE["FORBIDDEN"](f"Usted no es {rol_permitido}")
 
 #ERRORS ENPOINTS JWT
 @jwt.expired_token_loader

@@ -47,11 +47,6 @@ def verificar_igualdad_password(hash_password:str, password:str):
         return False, None
     return True, ERROR_CLIENTE["UNAUTHORIZED"]("contrasenia incorrecta")
 
-def verificar_rol_permitido(data_extra:dict, rol_permitido:str):
-    if data_extra["rol"] == rol_permitido:
-        return False, None
-    return True, ERROR_CLIENTE["FORBIDDEN"](f"Usted no es {rol_permitido}")
-
 
 def obtener_perfil(identificador:str):
     error, registro = repo.obtener_usuarios_filtros({"email":identificador})
