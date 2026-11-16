@@ -1,15 +1,14 @@
 from flask import Blueprint, jsonify
-from flask_jwt_extended import jwt_required 
+
 
 from source import extend_jwt
 from source.validators import sedes as val
 from source.services import sedes as serv
-from source.services import users as serv_users
 
 sede_bp = Blueprint('sede', __name__)
 
 @sede_bp.route('/sedes', methods=['GET'])
-@jwt_required()
+@extend_jwt.seguro()
 def get_sedes():
     error, registros = serv.listar_sedes()
     if error:
@@ -17,7 +16,7 @@ def get_sedes():
     return jsonify(registros), 200
 
 @sede_bp.route('/sedes/<int:id_sede>', methods=['GET'])
-@jwt_required()
+@extend_jwt.seguro()
 def get_sede_id(id_sede:int):
     error, registro = serv.obtener_sede(id_sede)
     if error:
@@ -25,10 +24,9 @@ def get_sede_id(id_sede:int):
     return jsonify(registro), 200
 
 @sede_bp.route('/sedes', methods=['POST'])
-@jwt_required()
+@extend_jwt.seguro()
 def post_sede():
-    identificador, data_extra = extend_jwt.obtener_informacion_token()
-    error, resultado = serv_users.verificar_rol_permitido(data_extra, "admin")
+    error, resultado = extend_jwt.verificar_rol_permitido("admin")
     if error:
         return resultado
     error, datos = val.validar_campos_sede()
@@ -40,10 +38,9 @@ def post_sede():
     return jsonify({"message": "Sede registrada", "id_sede": id_sede}), 201
 
 @sede_bp.route('/sedes/<int:id_sede>', methods=['PUT'])
-@jwt_required()
+@extend_jwt.seguro()
 def put_sede(id_sede:int):
-    identificador, data_extra = extend_jwt.obtener_informacion_token()
-    error, resultado = serv_users.verificar_rol_permitido(data_extra, "admin")
+    error, resultado = extend_jwt.verificar_rol_permitido("admin")
     if error:
         return resultado
     error, datos = val.validar_campos_sede()
@@ -55,10 +52,9 @@ def put_sede(id_sede:int):
     return jsonify({"message": "Sede modificada"}), 200
 
 @sede_bp.route('/sedes/<int:id_sede>', methods=['DELETE'])
-@jwt_required()
+@extend_jwt.seguro()
 def delete_sede(id_sede:int):
-    identificador, data_extra = extend_jwt.obtener_informacion_token()
-    error, resultado = serv_users.verificar_rol_permitido(data_extra, "admin")
+    error, resultado = extend_jwt.verificar_rol_permitido("admin")
     if error:
         return resultado
     error, resultado = serv.eliminar_sede(id_sede)
