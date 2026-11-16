@@ -23,9 +23,17 @@ def get_reservas():
         return registros
     return jsonify({"registros":registros}), 200
 
-@reserva_bp.route('/reservas/<id_reserva>', methods=['GET'])
-def get_reserva(id_reserva:str):
-    return jsonify({"registros":"reserva"}), 200
+@reserva_bp.route('/reservas/<int:id_reserva>', methods=['GET'])
+@extend_jwt.seguro()
+def get_reserva(id_reserva:int):
+    error, result = extend_jwt.verificar_rol_permitido("admin")
+    if error:
+        return result
+    
+    error, registros = repo.obtener_reservas_filtros({"id_reserva":id_reserva})
+    if error:
+        return registros
+    return jsonify({"registros":registros}), 200
 
 @extend_jwt.seguro()
 @reserva_bp.route('/reservas', methods=['POST'])
