@@ -1,6 +1,7 @@
 import os
 from flask_mail import Mail, Message
 from errors_code import ERROR_CLIENTE, ERROR_SERVIDOR
+from flask import render_template
 
 mail = Mail()
 
@@ -14,12 +15,42 @@ def config(app):
 
     mail.init_app(app)#resultado igual a mail = Mail(app)
 
-def send_email(asunto:str, destinatarios:list, cuerpo_texto:str):
+def send_bienvenida(usr:dict):
     try:
-        if len(destinatarios)==0:
-            return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"No se especificó ningún destinatario")
+
+        msg = Message(subject=f"Bienvenido/a, gracias por registrarse", recipients=[usr["email"],])
+        msg.html=render_template('bienvenida.html',
+                                 nombre=usr["nombre"],
+                                 apellido=usr["apellido"],
+                                 usuario=usr["email"],
+                                 rol=usr["rol"])
+
+        mail.send(msg)
+
+        return False, None
+    except Exception as e:
+        return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"send_email, motivo: {str(e)}")
+
+
+def send_reserva(qr_id:str, url_cancelar:str, qr_buffer, identificador:str, registro:dict):
+    try:
         
-        msg = Message(subject=asunto, recipients=destinatarios, body=cuerpo_texto)
+        msg = Message(subject=f"Reserva exitosa", recipients=[identificador,])
+
+        msg.html=render_template('reserva.html',
+                                qr=qr_id, 
+                                cancelar_url_boton=url_cancelar, 
+                                fecha_funcion=registro["fecha_hora"], 
+                                sala=registro["name_sala"], 
+                                sede=registro["name_sede"],
+                                direccion=registro["direccion_sede"] )
+
+        msg.attach(
+                    filename=f"{qr_id}.png",
+                    content_type="image/png",
+                    data=qr_buffer.read(),
+                    disposition="inline",
+                    headers={'Content-ID': '<qr_reserva>'})               
         mail.send(msg)
 
         return False, None

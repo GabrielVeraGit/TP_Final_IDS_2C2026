@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Bienvenido/a</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+    <h2>¡Bienvenido/a, {{ nombre }} {{ apellido }}!</h2>
+    <p>Gracias por registrarte en nuestro sistema. Tu cuenta ya se encuentra activa con los siguientes datos:</p>
+
+    <ul>
+        <li><strong>Nombre completo:</strong> {{ nombre }} {{ apellido }}</li>
+        <li><strong>Usuario / Email:</strong> {{ usuario }}</li>
+        <li><strong>Rol asignado:</strong> {{ rol }}</li>
+    </ul>
+
+    <p style="margin-top: 20px; font-size: 13px; color: #666;">
+        Ya puedes iniciar sesión con tu correo electrónico y contraseña para comenzar a realizar tus reservas.
+    </p>
+</body>
+</html>

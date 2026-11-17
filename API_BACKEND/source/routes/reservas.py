@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from source import extend_jwt
+from source import extend_jwt, extend_qr, extend_email
 
 from source.validators import reservas as val
 from source.services import reservas as serv
@@ -35,23 +35,46 @@ def get_reserva(id_reserva:int):
         return registros
     return jsonify({"registros":registros}), 200
 
-@extend_jwt.seguro()
+
 @reserva_bp.route('/reservas', methods=['POST'])
+@extend_jwt.seguro()
 def create_reserva():
     error, result = extend_jwt.verificar_rol_permitido("cliente")
     if error:
         return result
     
-    """
-    Recibe los dato, genera el registro, genera el qr y envia el mail en background, guarda el registro
-    qr almecenara el endpoint de usar_reserva
-    """
-    return "registro creado", 201
+    error, body_limpio = val.validando_json()
+    if error:
+        return body_limpio
 
-@reserva_bp.route('/reserva/<id_reserva>/cancelacion', methods=['PUT'])
-def cancelar_reserva(id_reserva:str):
+    error, respuesta = serv.confirmando_json(body_limpio)
+    if error:
+        return respuesta
+    error, registro = serv.confirmando_reserva(body_limpio)
+    if error:
+        return registro
+
+    qr_id, url_usar, url_cancelar = extend_qr.generar_code_y_urls()
+    qr_buffer = extend_qr.generar_qr_en_memoria(url_usar)
+    identificador, data_extra = extend_jwt.obtener_informacion_token()
+
+
+    body_limpio["id_usuario"]=data_extra["id_usuario"]
+    error, respuesta = repo.crear_reserva(body_limpio, registro, qr_id)
+    if error:
+        return respuesta
+
+
+    error, result = extend_email.send_reserva(qr_id, url_cancelar, qr_buffer, identificador, registro)
+    if error:
+        return respuesta    
+ 
+    return jsonify({"message": "Reserva registrada, revise su bandeja de entrada"}), 201
+
+@reserva_bp.route('/reserva/<string:qr_id>/cancelar', methods=['PUT'])
+def cancelar_reserva(qr_id:str):
     return "cancelacion realizada", 204
 
-@reserva_bp.route('/reserva/<id_reserva>/usada', methods=['PUT'])
-def usar_reserva(id_reserva:str):
+@reserva_bp.route('/reserva/<string:qr_id>/usar', methods=['PUT'])
+def usar_reserva(qr_id:str):
     return "uso realizado", 204

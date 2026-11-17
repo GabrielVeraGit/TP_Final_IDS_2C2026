@@ -1,5 +1,6 @@
 from errors_code import ERROR_SERVIDOR
 from source.db import ejecutar_instruccion
+from datetime import datetime
 
 #filtros: clave=la columna filtro; valor=el dato filtro
 def obtener_reservas_filtros(filtros:dict=None)-> list[dict]:
@@ -44,3 +45,35 @@ def obtener_reservas_filtros(filtros:dict=None)-> list[dict]:
     except Exception as e:
         return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB obtener_reservas_filtros, {str(e)}")
 
+def obtener_funcion_relacional_salas_sede(id_funcion:int):
+    query="""
+    SELECT sed.id_sede, f.*, s.numero as name_sala, s.capacidad as capacidad_sala, sed.nombre as name_sede, sed.direccion as direccion_sede, 
+    (
+    SELECT COALESCE(SUM(r.cant_entradas),0)
+    FROM RESERVAS r
+    WHERE r.id_funcion=%s AND r.estado_compra != 'cancelada'
+    ) as capacidad_ocupada
+    FROM FUNCIONES f
+    INNER JOIN SALAS s ON f.id_sala = s.id_sala
+    INNER JOIN SEDES sed ON s.id_sede = sed.id_sede
+    WHERE f.id_funcion = %s;"""
+    try:
+        registro_funcion = ejecutar_instruccion(query, (id_funcion,id_funcion))
+        return False, registro_funcion
+    except Exception as e:
+        return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB obtener_reservas_filtros, {str(e)}")
+
+def crear_reserva(body:dict, registro_funcion:dict, qr:str):
+  
+    id_usuario = body["id_usuario"]
+    fecha_de_compra=datetime.now()
+    monto_a_pagar=body["cant_entradas"]*int(registro_funcion["precio_entrada"])
+    query="""
+    INSERT INTO RESERVAS (id_funcion, id_usuario, fecha_de_compra, qr, cant_entradas, monto_a_pagar )
+    VALUES (%s, %s, %s, %s, %s, %s);"""
+    valores=(body["id_funcion"], id_usuario, fecha_de_compra, qr, body["cant_entradas"], monto_a_pagar)
+    try:
+        resultado = ejecutar_instruccion(query, valores, autocommit=True )
+        return False, None
+    except Exception as e:
+        return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB obtener_reservas_filtros, {str(e)}")

@@ -31,7 +31,7 @@ def register_user():
     if error:
         return resultado
     
-    error, resultado = extend_email.send_email("Este es un asunto, BIEMBENIDO",[data["email"]], "este es el cuerpo")
+    error, resultado = extend_email.send_bienvenida(data)
     if error:
         return resultado
     
