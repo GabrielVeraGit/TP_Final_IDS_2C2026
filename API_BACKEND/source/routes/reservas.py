@@ -72,8 +72,18 @@ def create_reserva():
     return jsonify({"message": "Reserva registrada, revise su bandeja de entrada"}), 201
 
 @reserva_bp.route('/reserva/<string:qr_id>/cancelar', methods=['PUT'])
+@extend_jwt.seguro()
 def cancelar_reserva(qr_id:str):
-    return "cancelacion realizada", 204
+    error, result = extend_jwt.verificar_rol_permitido("cliente")
+    if error:
+        return result
+    error, registro = serv.confirmando_cancelacion(qr_id)
+    if error:
+        return registro
+    error, result = repo.cancelar_reserva(registro, qr_id)
+    if error:
+        return registro
+    return "", 204
 
 @reserva_bp.route('/reserva/<string:qr_id>/usar', methods=['PUT'])
 def usar_reserva(qr_id:str):

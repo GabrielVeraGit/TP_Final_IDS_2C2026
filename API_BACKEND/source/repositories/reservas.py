@@ -61,7 +61,7 @@ def obtener_funcion_relacional_salas_sede(id_funcion:int):
         registro_funcion = ejecutar_instruccion(query, (id_funcion,id_funcion))
         return False, registro_funcion
     except Exception as e:
-        return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB obtener_reservas_filtros, {str(e)}")
+        return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB obtener_funcion_relacional, {str(e)}")
 
 def crear_reserva(body:dict, registro_funcion:dict, qr:str):
   
@@ -76,4 +76,13 @@ def crear_reserva(body:dict, registro_funcion:dict, qr:str):
         resultado = ejecutar_instruccion(query, valores, autocommit=True )
         return False, None
     except Exception as e:
-        return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB obtener_reservas_filtros, {str(e)}")
+        return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB crear_reserva, {str(e)}")
+
+
+def cancelar_reserva(registro:dict, qr_id:str):
+    query="""UPDATE RESERVAS SET estado_compra='cancelada' WHERE id_reserva=%s AND qr=%s;"""
+    try:
+        resultado = ejecutar_instruccion(query, (registro["id_reserva"], qr_id), autocommit=True )
+        return False, None
+    except Exception as e:
+        return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB cancelar_reserva: {str(e)}")

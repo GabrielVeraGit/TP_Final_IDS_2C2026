@@ -1,6 +1,7 @@
 from errors_code import ERROR_CLIENTE
 from source.repositories import reservas as repo
-from datetime import datetime
+from source import extend_jwt
+from datetime import datetime, timedelta
 
 def confirmando_campos(campos:dict):
     campos_validos_int=("id_funcion", "id_usuario", "cant_entradas")
@@ -54,3 +55,32 @@ def confirmando_reserva(body:dict):
         return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"cant_entradas={body['cant_entradas']} supera la capacidad_disponible={capacidad_disponible}")
     
     return False, registro
+
+
+def confirmando_cancelacion(qr_id:str):
+    identificador, data_extra = extend_jwt.obtener_informacion_token()
+    error, registro_re = repo.obtener_reservas_filtros({"id_usuario":data_extra["id_usuario"],"qr":qr_id})
+    if error:
+        return True, registro_re
+    
+    if len(registro_re) == 0:
+        return True, ERROR_CLIENTE["BAD_REQUEST"]("qr_id y el cliente no coinciden")
+    registro_re=registro_re[0]
+
+    if registro_re["estado_compra"] != "reservada":
+        return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"La reserva esta {registro_re['estado_compra']}, no es posible cancelarlo")
+    
+    error, registro_fun = repo.obtener_funcion_relacional_salas_sede(registro_re["id_funcion"])
+    if error:
+        return True, registro_fun
+
+    registro_fun=registro_fun[0]
+
+    hora_limite_cancelar=registro_fun["fecha_hora"] - timedelta(hours=1)
+
+    if datetime.now() >= hora_limite_cancelar:
+            return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"Ya no es posible cancelar la reserva, supero el tiempo limite")
+
+    return False, registro_re
+    
+    
