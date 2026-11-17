@@ -86,5 +86,15 @@ def cancelar_reserva(qr_id:str):
     return "", 204
 
 @reserva_bp.route('/reserva/<string:qr_id>/usar', methods=['PUT'])
+@extend_jwt.seguro()
 def usar_reserva(qr_id:str):
-    return "uso realizado", 204
+    error, result = extend_jwt.verificar_rol_permitido("admin")
+    if error:
+        return result
+    error, registro = serv.confirmando_uso(qr_id)
+    if error:
+        return registro
+    error, registro = serv.usar_reserva(registro, qr_id)
+    if error:
+        return registro    
+    return "", 204

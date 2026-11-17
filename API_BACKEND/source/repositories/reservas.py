@@ -79,10 +79,19 @@ def crear_reserva(body:dict, registro_funcion:dict, qr:str):
         return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB crear_reserva, {str(e)}")
 
 
-def cancelar_reserva(registro:dict, qr_id:str):
-    query="""UPDATE RESERVAS SET estado_compra='cancelada' WHERE id_reserva=%s AND qr=%s;"""
+
+def actualizar_estado_reserva(registro: dict, qr_id: str, nuevo_estado: str):
+    query = """UPDATE RESERVAS SET estado_compra=%s WHERE id_reserva=%s AND qr=%s;"""
     try:
-        resultado = ejecutar_instruccion(query, (registro["id_reserva"], qr_id), autocommit=True )
+        result = ejecutar_instruccion(query, (nuevo_estado, registro["id_reserva"], qr_id), autocommit=True)
         return False, None
     except Exception as e:
-        return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB cancelar_reserva: {str(e)}")
+        return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB actualizar_estado ({nuevo_estado}): {str(e)}")
+
+
+def cancelar_reserva(registro: dict, qr_id: str):
+    return actualizar_estado_reserva(registro, qr_id, "cancelada")
+
+
+def usar_reserva(registro: dict, qr_id: str):
+    return actualizar_estado_reserva(registro, qr_id, "usada")

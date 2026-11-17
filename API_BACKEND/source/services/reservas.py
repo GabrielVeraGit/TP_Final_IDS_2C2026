@@ -84,3 +84,28 @@ def confirmando_cancelacion(qr_id:str):
     return False, registro_re
     
     
+def confirmando_uso(qr_id:str):
+
+    error, registro_re = repo.obtener_reservas_filtros({"qr":qr_id})
+    if error:
+        return True, registro_re
+    
+    if len(registro_re) == 0:
+        return True, ERROR_CLIENTE["BAD_REQUEST"]("qr_id no existe")
+    registro_re=registro_re[0]
+
+    if registro_re["estado_compra"] != "reservada":
+        return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"La reserva esta {registro_re['estado_compra']}, no es posible usarla")
+    
+    error, registro_fun = repo.obtener_funcion_relacional_salas_sede(registro_re["id_funcion"])
+    if error:
+        return True, registro_fun
+
+    registro_fun=registro_fun[0]
+
+    hora_inicial_usar=registro_fun["fecha_hora"] - timedelta(hours=1)
+
+    if datetime.now() < hora_inicial_usar:
+            return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"No es posible usar la reserva, no llego la hora de escanear")
+
+    return False, registro_re
