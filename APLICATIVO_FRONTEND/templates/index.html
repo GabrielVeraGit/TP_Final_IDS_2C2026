@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>{% block title %}Cine Paradiso{% endblock %}</title>
+</head>
+<body>
+
+
+    <nav id="navegacion">
+      <a href="{{ url_for('index') }}"><h1>CINE PARADISO</h1></a>
+      <a href="{{ url_for('index') }}"><h2>Inicio</h2></a>
+
+      {% if logueado %}
+     
+        <h3>User: {{ logueado }}</h3>
+        <form action="{{ url_for('user_bp.logout') }}" method="POST">
+          <button type="submit">Press to Logout</button>
+        </form>
+      {% else %}
+   
+        <a href="{{ url_for('user_bp.login')}}">
+          <h3>Press to Login</h3>
+        </a>
+      {% endif %}
+    </nav>
+
+
+    <main id="contenido_principal">
+        {% block contenido %}
+            <h1>Bienvenido al inicio de INDEX</h1>
+        {% endblock %}
+    </main>
+
+
+    <footer id="footer" >
+  <div>
+    <!-- Columna Info -->
+    <div>
+      <h2>Cine Paradiso</h2>
+      <p>{{vars_footer["texto_cine"]}}</p>
+    </div>
+
+    <!-- Columna Contacto -->
+    <div>
+      <h3>CONTACTO Y SOPORTE</h3>
+      <ul>
+        {% for tipo, url in vars_footer["soporte"].items() %}
+          <li><a href="{{ url_for(url)}}">{{ tipo }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+
+    <div>
+      <h3>REDES SOCIALES</h3>
+      <ul>
+        {% for name, link in vars_footer["redes_sociales"].items() %}
+          <li><a href="{{ link }}">{{name}}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Columna Sedes -->
+    <div>
+      <h3>NUESTRAS SEDES</h3>
+      <ul>
+        {% for name, direccion in vars_footer["registros"].items() %}
+          <li>
+            <strong>{{ name }}</strong>
+            <p>{{ direccion }}</p>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <hr>
+
+  <div>
+    <p>© 2026 Cine Paradiso — Facultad de Ingeniería UBA. Todos los derechos reservados.</p>
+    <div>
+      <a href="{{url_for('index')}}">Términos de servicio</a> • <a href="{{url_for('index')}}">Privacidad</a>
+    </div>
+  </div>
+    </footer>
+</body>
+</html>

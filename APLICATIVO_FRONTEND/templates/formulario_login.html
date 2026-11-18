@@ -1,0 +1,22 @@
+{% extends 'index.html' %}
+
+{% block title %}Login - Cine Paradiso{% endblock %}
+
+{% block contenido %}
+        <h2>Inicio sesion de Usuario</h2>
+
+        <form action="{{ url_for('user_bp.login') }}" method="POST">
+            <input type="email" name="email" placeholder="Tu correo" required>
+            <input type="password" name="password" placeholder="Contraseña" required>
+            <button type="submit">Iniciar Sesion</button>
+        </form>
+
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% elif exito %}
+        <script>
+            alert("¡Login correcto! Presiona Aceptar para continuar.");
+            window.location.replace("{{ url_for('index')}}");
+        </script>
+        {% endif %}
+{% endblock %}

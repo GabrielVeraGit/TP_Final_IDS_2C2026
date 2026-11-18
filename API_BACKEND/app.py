@@ -71,4 +71,4 @@ def index():
 
 if __name__ == "__main__":
     puerto=int(os.getenv("PORT_API_BACKEND", 5001))
-    app.run(port=puerto, debug=False)
+    app.run(port=puerto, debug=True)
