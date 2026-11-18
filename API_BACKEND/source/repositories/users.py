@@ -35,7 +35,7 @@ def obtener_usuarios_filtros(filtros:dict=None, con_password:bool=False)-> list[
         for columna in filtros.keys():
             condiciones.append(f"{columna}=%s")
         valores = tuple(filtros.values())
-        columnas=" AND ".join(columnas)
+        columnas=" AND ".join(condiciones)
 
         query=f"{query} WHERE {columnas};"
     else:
