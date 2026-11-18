@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block titulo %}{{ pelicula.titulo }}{% endblock %}
+{% block contenido %}
+<div class="detalle">
+    {% if pelicula.poster and pelicula.poster.startswith('http') %}
+        <img src="{{ pelicula.poster }}" alt="Poster de {{ pelicula.titulo }}">
+    {% endif %}
+    <div>
+        <h1>{{ pelicula.titulo }} ({{ pelicula.anio }})</h1>
+        <p class="chico">{{ pelicula.genero }} | {{ pelicula.duracion }} | {{ pelicula.clasificacion }}</p>
+        <p><b>Director:</b> {{ pelicula.director }}</p>
+        <p><b>Actores:</b> {{ pelicula.actores }}</p>
+        <p>{{ pelicula.sinopsis }}</p>
+    </div>
+</div>
+
+<h2>Funciones disponibles</h2>
+{% if funciones %}
+<div class="tabla-scroll">
+<table class="apilable">
+    <tr class="cabecera"><th>Fecha y hora</th><th>Sede</th><th>Sala</th><th>Precio</th><th>Entradas libres</th><th>Comprar</th></tr>
+    {% for f in funciones %}
+    <tr>
+        <td data-label="Fecha y hora">{{ f.fecha_hora }}</td>
+        <td data-label="Sede">{{ f.sede }}</td>
+        <td data-label="Sala">{{ f.sala }}</td>
+        <td data-label="Precio">${{ "%.2f"|format(f.precio_entrada) }}</td>
+        <td data-label="Entradas libres">{{ f.entradas_disponibles }} de {{ f.capacidad }}</td>
+        <td data-label="Comprar">
+            {% if f.entradas_disponibles <= 0 %}
+                Agotada
+            {% elif session.get('rol') == 'cliente' %}
+                <form class="en-linea" method="post" action="/comprar/{{ f.id_funcion }}">
+                    <input type="number" name="cant_entradas" value="1" min="1" max="{{ [10, f.entradas_disponibles]|min }}" class="chico-input">
+                    <button type="submit">Comprar</button>
+                </form>
+            {% elif session.get('rol') == 'admin' %}
+                Solo clientes
+            {% else %}
+                <a href="/login?siguiente=/pelicula/{{ pelicula.id_pelicula }}">Ingresa para comprar</a>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% else %}
+<p>No hay funciones programadas para esta pelicula.</p>
+{% endif %}
+{% endblock %}
