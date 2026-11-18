@@ -41,7 +41,7 @@ def config(app):
     app.config["JWT_SECRET_KEY"] = os.getenv("TOKEN_KEY_CODIFICACION") #clave super secreta
     app.config["JWT_TOKEN_LOCATION"] = ["cookies"] #enves de leer y enviar tokens, seran cookies
     app.config["JWT_COOKIE_CSRF_PROTECT"] = False
-    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes= int(os.getenv("TOKEN_DURACION_MIN")))#tiempo de duracion del token
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes= int(os.getenv("TOKEN_DURACION_MIN", "60")))#tiempo de duracion del token
     app.config["JWT_SESSION_COOKIE"] = False  # Sincroniza la expiración de la cookie con el token
     
     jwt.init_app(app)#resultado igual a jwt = JWTManager(app)
