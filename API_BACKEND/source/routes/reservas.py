@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+from errors_code import ERROR_CLIENTE
 from source import extend_jwt, extend_qr, extend_email
 
 from source.validators import reservas as val
@@ -14,6 +15,10 @@ def get_reservas():
     if error:
         return qp_limpios
     
+    identificador, data_extra = extend_jwt.obtener_informacion_token()
+    if data_extra["rol"] == "cliente":
+        qp_limpios["id_usuario"] = data_extra["id_usuario"]
+
     error, respuesta = serv.confirmando_query_paramts(qp_limpios)
     if error:
         return respuesta
@@ -26,13 +31,16 @@ def get_reservas():
 @reserva_bp.route('/reservas/<int:id_reserva>', methods=['GET'])
 @extend_jwt.seguro()
 def get_reserva(id_reserva:int):
-    error, result = extend_jwt.verificar_rol_permitido("admin")
-    if error:
-        return result
+    filtros = {"id_reserva":id_reserva}
+    identificador, data_extra = extend_jwt.obtener_informacion_token()
+    if data_extra["rol"] == "cliente":
+        filtros["id_usuario"] = data_extra["id_usuario"]
     
-    error, registros = repo.obtener_reservas_filtros({"id_reserva":id_reserva})
+    error, registros = repo.obtener_reservas_filtros(filtros)
     if error:
         return registros
+    if len(registros) == 0:
+        return ERROR_CLIENTE["NOT_FOUND"](f"La reserva {id_reserva} no existe")
     return jsonify({"registros":registros}), 200
 
 
@@ -53,25 +61,25 @@ def create_reserva():
     error, registro = serv.confirmando_reserva(body_limpio)
     if error:
         return registro
+    
+    identificador, data_extra = extend_jwt.obtener_informacion_token()
+    
+    body_limpio["id_usuario"]=data_extra["id_usuario"]
 
     qr_id, url_usar, url_cancelar = extend_qr.generar_code_y_urls()
-    qr_buffer = extend_qr.generar_qr_en_memoria(url_usar)
-    identificador, data_extra = extend_jwt.obtener_informacion_token()
-
-
-    body_limpio["id_usuario"]=data_extra["id_usuario"]
-    error, respuesta = repo.crear_reserva(body_limpio, registro, qr_id)
+    error, respuesta = repo.crear_reserva(body_limpio, qr_id)
     if error:
         return respuesta
 
-
+    qr_buffer = extend_qr.generar_qr_en_memoria(url_usar)
     error, result = extend_email.send_reserva(qr_id, url_cancelar, qr_buffer, identificador, registro)
     if error:
-        return respuesta    
+        return jsonify({"message": "Reserva registrada, pero no se pudo enviar el mail"}), 201
  
     return jsonify({"message": "Reserva registrada, revise su bandeja de entrada"}), 201
 
-@reserva_bp.route('/reserva/<string:qr_id>/cancelar', methods=['PUT'])
+
+@reserva_bp.route('/reservas/<string:qr_id>/cancelar', methods=['PUT'])
 @extend_jwt.seguro()
 def cancelar_reserva(qr_id:str):
     error, result = extend_jwt.verificar_rol_permitido("cliente")
@@ -82,10 +90,11 @@ def cancelar_reserva(qr_id:str):
         return registro
     error, result = repo.cancelar_reserva(registro, qr_id)
     if error:
-        return registro
-    return "", 204
+        return result
+    return jsonify({"message": "Reserva cancelada"}), 200
 
-@reserva_bp.route('/reserva/<string:qr_id>/usar', methods=['PUT'])
+
+@reserva_bp.route('/reservas/<string:qr_id>/usar', methods=['PUT'])
 @extend_jwt.seguro()
 def usar_reserva(qr_id:str):
     error, result = extend_jwt.verificar_rol_permitido("admin")
@@ -94,7 +103,7 @@ def usar_reserva(qr_id:str):
     error, registro = serv.confirmando_uso(qr_id)
     if error:
         return registro
-    error, registro = serv.usar_reserva(registro, qr_id)
+    error, result = repo.usar_reserva(registro, qr_id)
     if error:
-        return registro    
-    return "", 204
+        return result    
+    return jsonify({"message": "Reserva usada"}), 200

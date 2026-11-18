@@ -1,6 +1,7 @@
 from errors_code import ERROR_CLIENTE
 from source.repositories import reservas as repo
 from source import extend_jwt
+from source.utils import config
 from datetime import datetime, timedelta
 
 def confirmando_campos(campos:dict):
@@ -50,9 +51,8 @@ def confirmando_reserva(body:dict):
     if datetime.now() >= registro["fecha_hora"]:
         return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"La funcion ya comenzo o termino")
 
-    capacidad_disponible = int(registro["capacidad_sala"]) - int(registro["capacidad_ocupada"])
-    if body["cant_entradas"] > capacidad_disponible:
-        return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"cant_entradas={body['cant_entradas']} supera la capacidad_disponible={capacidad_disponible}")
+    if body["cant_entradas"] > config.MAX_ENTRADAS_POR_RESERVA:
+        return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"Maximo {config.MAX_ENTRADAS_POR_RESERVA} entradas por reserva")
     
     return False, registro
 
@@ -76,7 +76,7 @@ def confirmando_cancelacion(qr_id:str):
 
     registro_fun=registro_fun[0]
 
-    hora_limite_cancelar=registro_fun["fecha_hora"] - timedelta(hours=1)
+    hora_limite_cancelar=registro_fun["fecha_hora"] - timedelta(hours=config.HORAS_LIMITE_CANCELACION)
 
     if datetime.now() >= hora_limite_cancelar:
             return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"Ya no es posible cancelar la reserva, supero el tiempo limite")
@@ -103,9 +103,13 @@ def confirmando_uso(qr_id:str):
 
     registro_fun=registro_fun[0]
 
-    hora_inicial_usar=registro_fun["fecha_hora"] - timedelta(hours=1)
+    hora_inicial_usar=registro_fun["fecha_hora"] - timedelta(minutes=config.MINUTOS_ANTES_VALIDACION_QR)
+    hora_final_usar=registro_fun["fecha_hora"] + timedelta(minutes=config.MINUTOS_DESPUES_VALIDACION_QR)
 
-    if datetime.now() < hora_inicial_usar:
-            return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"No es posible usar la reserva, no llego la hora de escanear")
+    ahora = datetime.now()
+    if ahora < hora_inicial_usar:
+        return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"]("No es posible usar la reserva, no llego la hora de escanear")
+    if ahora > hora_final_usar:
+        return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"]("No es posible usar la reserva, el tiempo para escanear ya paso")
 
     return False, registro_re
