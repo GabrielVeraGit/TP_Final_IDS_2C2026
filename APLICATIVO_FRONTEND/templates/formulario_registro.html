@@ -1,0 +1,24 @@
+{% extends 'index.html' %}
+
+{% block title %}Registro - Cine Paradiso{% endblock %}
+
+{% block contenido %}
+        <h2>Registro de Usuario</h2>
+
+        <form action="{{ url_for('user_bp.registro') }}" method="POST">
+            <input type="text" name="nombre" placeholder="Tu nombre" required>
+            <input type="text" name="apellido" placeholder="Tu apellido" required>
+            <input type="email" name="email" placeholder="Tu correo" required>
+            <input type="password" name="password" placeholder="Contraseña" required>
+            <button type="submit">Registrarse</button>
+        </form>
+
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% elif exito %}
+            <script>
+                alert("¡registro correcto {{ exito }}! Presiona Aceptar para continuar.");
+                window.location.replace("{{ url_for('index')}}");
+            </script>
+        {% endif %}
+{% endblock %}

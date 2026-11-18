@@ -105,6 +105,8 @@ crear_ingresar_env(){
         sed -i "s/TOKEN_DURACION_MIN=duracion_minutos/TOKEN_DURACION_MIN=${duracion_token}/" ./API_BACKEND/.env
 
         grep "PORT_APLICATIVO_FRONTEND" ./.env.example >> ./APLICATIVO_FRONTEND/.env
+        grep "PORT_API_BACKEND" ./.env.example >> ./APLICATIVO_FRONTEND/.env
+        printf "\nTOKEN_KEY_CODIFICACION='%s'\n" "${pass_remitente}" >> ./APLICATIVO_FRONTEND/.env
         echo "EXITO!"
 
     fi
