@@ -33,7 +33,7 @@ def register_user():
     
     error, resultado = extend_email.send_bienvenida(data)
     if error:
-        return resultado
+        return jsonify({"message": "Usuario registrado, pero no se pudo enviar el mail de bienvenida"}), 201
     
     return jsonify({"message": "Usuario registrado, revise su bandeja de entrada"}), 201
 
@@ -54,13 +54,13 @@ def login_user():
     
     token = extend_jwt.crear_token(registro)
     respuesta = extend_jwt.crear_cookie(token)
-    return respuesta, 201
+    return respuesta, 200
 
 @user_bp.route('/user/logout', methods=['POST'])
 @extend_jwt.seguro()
 def logout_user():
     respuesta = extend_jwt.eliminar_cookie()
-    return respuesta, 201
+    return respuesta, 200
 
 @user_bp.route('/user/perfil', methods=['GET'])#para clientes
 @extend_jwt.seguro()
@@ -86,3 +86,17 @@ def get_users():
     if error:
         return registros
     return jsonify({"registros":registros}), 200
+
+@user_bp.route('/emails-admin', methods=['POST'])
+@extend_jwt.seguro()
+def post_email_admin():
+    error, resultado = extend_jwt.verificar_rol_permitido("admin")
+    if error:
+        return resultado
+    error, datos = val.validar_email_admin()
+    if error:
+        return datos
+    error, resultado = serv.registrar_email_admin(datos)
+    if error:
+        return resultado
+    return jsonify({"message": "Email registrado como admin"}), 201

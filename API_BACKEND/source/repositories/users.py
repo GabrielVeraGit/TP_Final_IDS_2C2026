@@ -31,8 +31,10 @@ def obtener_usuarios_filtros(filtros:dict=None, con_password:bool=False)-> list[
         query = f"SELECT id_usuario, nombre, apellido, email, rol FROM USUARIOS"
     valores=()
     if filtros:
-        columnas, valores=zip(*filtros.items())
-        columnas = list(map(lambda a: f"{a}=%s", columnas))
+        condiciones = []
+        for columna in filtros.keys():
+            condiciones.append(f"{columna}=%s")
+        valores = tuple(filtros.values())
         columnas=" AND ".join(columnas)
 
         query=f"{query} WHERE {columnas};"
@@ -69,5 +71,13 @@ def obtener_peliculas_vistas(id_usuario: int) -> list[dict]:
                GROUP BY P.id_pelicula, P.titulo, P.poster, P.genero
                ORDER BY ultima_vez_vista DESC"""
     return ejecutar_instruccion(query, (id_usuario,))
+
+def append_email_admin(email:str):
+    query = "INSERT INTO EMAILS_ADMIN (email) VALUES (%s);"
+    try:
+        ejecutar_instruccion(query, (email,), True)
+        return False, None
+    except Exception as e:
+        return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB append_email_admin, {str(e)}")
 
     

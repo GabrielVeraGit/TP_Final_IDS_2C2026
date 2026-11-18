@@ -75,3 +75,14 @@ def obtener_usuario_login(usr:dict):
     if len(resultado)==0:
         return True, ERROR_CLIENTE["NOT_FOUND"]("El email no esta registrado")
     return False, resultado[0]
+
+def registrar_email_admin(datos:dict):
+    error, resultado = validando_dominio_email(datos)
+    if error:
+        return True, resultado
+    error, emails_admins = repo.obtener_emails_admins()
+    if error:
+        return True, emails_admins
+    if datos["email"] in emails_admins:
+        return True, ERROR_CLIENTE["CONFLICT"]("El email ya esta registrado como admin")
+    return repo.append_email_admin(datos["email"])
