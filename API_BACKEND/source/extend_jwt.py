@@ -52,7 +52,7 @@ def verificar_rol_permitido(rol_permitido:str):
         return False, None
     return True, ERROR_CLIENTE["FORBIDDEN"](f"Usted no es {rol_permitido}")
 
-#ERRORS ENPOINTS JWT
+#ERRORS ENDPOINTS JWT
 @jwt.expired_token_loader
 def token_expirado(jwt_header, jwt_payload):
     json, code_n = ERROR_CLIENTE["UNAUTHORIZED"]("Token caducado, por favor inicia sesión nuevamente.")
@@ -62,3 +62,7 @@ def token_expirado(jwt_header, jwt_payload):
 @jwt.unauthorized_loader
 def token_ausente(reason):
     return ERROR_CLIENTE["UNAUTHORIZED"]("No se mando un token")
+
+@jwt.invalid_token_loader
+def token_invalido(reason):
+    return ERROR_CLIENTE["UNAUTHORIZED"]("El token es invalido")

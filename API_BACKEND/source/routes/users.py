@@ -54,13 +54,13 @@ def login_user():
     
     token = extend_jwt.crear_token(registro)
     respuesta = extend_jwt.crear_cookie(token)
-    return respuesta, 201
+    return respuesta, 200
 
 @user_bp.route('/user/logout', methods=['POST'])
 @extend_jwt.seguro()
 def logout_user():
     respuesta = extend_jwt.eliminar_cookie()
-    return respuesta, 201
+    return respuesta, 200
 
 @user_bp.route('/user/perfil', methods=['GET'])#para clientes
 @extend_jwt.seguro()

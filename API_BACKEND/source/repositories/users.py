@@ -31,8 +31,10 @@ def obtener_usuarios_filtros(filtros:dict=None, con_password:bool=False)-> list[
         query = f"SELECT id_usuario, nombre, apellido, email, rol FROM USUARIOS"
     valores=()
     if filtros:
-        columnas, valores=zip(*filtros.items())
-        columnas = list(map(lambda a: f"{a}=%s", columnas))
+        condiciones = []
+        for columna in filtros.keys():
+            condiciones.append(f"{columna}=%s")
+        valores = tuple(filtros.values())
         columnas=" AND ".join(columnas)
 
         query=f"{query} WHERE {columnas};"
