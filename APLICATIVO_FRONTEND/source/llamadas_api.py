@@ -41,7 +41,7 @@ def llamar_api(metodo:str, ruta:str, token:str=None, datos:dict=None, params:dic
 
 def iniciar_sesion_api(email:str, password:str):
     try:
-        respuesta = requests.request(metodo, url_api() + ruta, json=datos, params=params, cookies=cookies, headers=armar_headers(), timeout=TIMEOUT_SEG)
+        respuesta = requests.post(url_api() + "/user/login", json={"email": email, "password": password}, headers=armar_headers(), timeout=TIMEOUT_SEG)
     except requests.exceptions.RequestException:
         return True, "No se pudo conectar con la API", 503
     error, cuerpo, codigo = armar_resultado(respuesta)
