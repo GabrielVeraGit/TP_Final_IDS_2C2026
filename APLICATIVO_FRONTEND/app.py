@@ -5,7 +5,7 @@ from source import formato
 from source.config import SEDES
 #from source.usuarios import usuarios_bp
 #from source.cartelera import cartelera_bp
-#from source.reservas import reservas_bp
+from source.reservas import reservas_bp
 #from source.admin import admin_bp
 #saquen el # cuando hayan creado el archivo y su bp!
 
@@ -16,7 +16,7 @@ app.secret_key = os.getenv("FRONT_SECRET_KEY", "clave_del_aplicativo_tp")
 
 #app.register_blueprint(usuarios_bp)
 #app.register_blueprint(cartelera_bp)
-#app.register_blueprint(reservas_bp)
+app.register_blueprint(reservas_bp)
 #app.register_blueprint(admin_bp)
 #lo mismo aca
 app.add_template_filter(formato.filtro_fecha, "fecha")
