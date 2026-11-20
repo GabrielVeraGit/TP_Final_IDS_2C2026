@@ -15,6 +15,7 @@
             <th>Entradas</th>
             <th>Total</th>
             <th>Estado</th>
+            <th>Acciones</th>
         </tr>
 
         {% for r in reservas %}
@@ -25,6 +26,17 @@
             <td data-label="Entradas">{{ r.cant_entradas }}</td>
             <td data-label="Total">{{ r.monto_a_pagar | dinero }}</td>
             <td data-label="Estado">{{ r.estado_compra }}</td>
+
+            <td data-label="Acciones">
+                {% if r.estado_compra == "reservada" %}
+                <form method="post" action="/reservas/{{ r.qr }}/cancelar">
+                    <button type="submit">Cancelar</button>
+                </form>
+                {% else %}
+                -
+                {% endif %}
+            </td>
+
         </tr>
         {% endfor %}
     </table>

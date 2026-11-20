@@ -30,7 +30,7 @@ def comprar(id_funcion):
     if error:
         return manejar_error(respuesta, codigo, "/")
 
-    flash("Reserva realizada correctamente", "success")
+    flash(respuesta.get("message", "Reserva realizada correctamente"), "success")
     return redirect("/")
 
 @reservas_bp.route("/mis-reservas")
@@ -47,3 +47,22 @@ def mis_reservas():
     reservas = respuesta.get("registros", [])
 
     return render_template("mis_reservas.html", reservas=reservas)
+
+
+@reservas_bp.route("/reservas/<string:qr_id>/cancelar", methods=["POST"])
+def cancelar(qr_id):
+    acceso = verificar_sesion("cliente")
+    if acceso:
+        return acceso
+
+    error, respuesta, codigo = llamar(
+        "PUT",
+        f"/reservas/{qr_id}/cancelar"
+    )
+
+    if error:
+        return manejar_error(respuesta, codigo, "/mis-reservas")
+
+    flash("Reserva cancelada correctamente", "success")
+    return redirect("/mis-reservas")
+
