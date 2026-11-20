@@ -1,5 +1,5 @@
 
-from flask import Blueprint, request, redirect, url_for, flash
+from flask import Blueprint, request, redirect, url_for, flash, render_template
 from source.utils import llamar, verificar_sesion, manejar_error
 
 reservas_bp = Blueprint("reservas_bp", __name__)
@@ -32,3 +32,18 @@ def comprar(id_funcion):
 
     flash("Reserva realizada correctamente", "success")
     return redirect("/")
+
+@reservas_bp.route("/mis-reservas")
+def mis_reservas():
+    acceso = verificar_sesion("cliente")
+    if acceso:
+        return acceso
+
+    error, respuesta, codigo = llamar("GET", "/reservas")
+
+    if error:
+        return manejar_error(respuesta, codigo, "/")
+
+    reservas = respuesta.get("registros", [])
+
+    return render_template("mis_reservas.html", reservas=reservas)

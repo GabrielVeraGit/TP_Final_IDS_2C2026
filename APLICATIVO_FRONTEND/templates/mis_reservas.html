@@ -1,0 +1,36 @@
+
+{% extends "base.html" %}
+{% block titulo %}Mis reservas{% endblock %}
+{% block contenido %}
+
+<h1>Mis reservas</h1>
+
+{% if reservas %}
+<div class="tabla-scroll">
+    <table class="apilable">
+        <tr class="cabecera">
+            <th>Reserva</th>
+            <th>Funcion</th>
+            <th>Fecha de compra</th>
+            <th>Entradas</th>
+            <th>Total</th>
+            <th>Estado</th>
+        </tr>
+
+        {% for r in reservas %}
+        <tr>
+            <td data-label="Reserva">{{ r.id_reserva }}</td>
+            <td data-label="Funcion">{{ r.id_funcion }}</td>
+            <td data-label="Fecha de compra">{{ r.fecha_de_compra }}</td>
+            <td data-label="Entradas">{{ r.cant_entradas }}</td>
+            <td data-label="Total">{{ r.monto_a_pagar | dinero }}</td>
+            <td data-label="Estado">{{ r.estado_compra }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% else %}
+<p>Todavia no tenes reservas.</p>
+{% endif %}
+
+{% endblock %}
