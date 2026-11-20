@@ -3,30 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block titulo %}Cine Paradiso{% endblock %}</title>
+    <title>{% block titulo %}Cine Paradiso{% endblock %} - Cine Paradiso</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <header>
-        <a class="marca" href="/">Cine Paradiso</a>
-        <nav>
-            <a href="/">Cartelera</a>
-            {% if session.get('token') %}
-                {% if session.get('rol') == 'admin' %}
-                    <a href="/admin">Backoffice</a>
+        <div class="barra">
+            <a class="marca" href="/">Cine <span>Paradiso</span></a>
+            <button id="boton-menu" type="button">Menu</button>
+            <nav id="menu">
+                <a href="/" class="{{ 'activo' if seccion == 'cartelera' }}">Cartelera</a>
+                {% if session.get('token') %}
+                    {% if session.get('rol') == 'admin' %}
+                        <a href="/admin" class="{{ 'activo' if seccion == 'admin' }}">Backoffice</a>
+                    {% else %}
+                        <a href="/mis-reservas" class="{{ 'activo' if seccion == 'reservas' }}">Mis reservas</a>
+                        <a href="/perfil" class="{{ 'activo' if seccion == 'perfil' }}">Mi perfil</a>
+                    {% endif %}
+                    <form method="post" action="/logout">
+                        <button type="submit" class="link">Salir ({{ session.get('email') }})</button>
+                    </form>
                 {% else %}
-                    <a href="/mis-reservas">Mis reservas</a>
-                    <a href="/perfil">Mi perfil</a>
+                    <a href="/login">Ingresar</a>
+                    <a href="/registro">Registrarse</a>
                 {% endif %}
-                <form class="en-linea" method="post" action="/logout">
-                    <button type="submit" class="boton-link">Salir ({{ session.get('email') }})</button>
-                </form>
-            {% else %}
-                <a href="/login">Ingresar</a>
-                <a href="/registro">Registrarse</a>
-            {% endif %}
-        </nav>
+            </nav>
+        </div>
     </header>
+
     <main>
         {% with mensajes = get_flashed_messages(with_categories=true) %}
             {% for categoria, mensaje in mensajes %}
@@ -35,6 +39,27 @@
         {% endwith %}
         {% block contenido %}{% endblock %}
     </main>
-    <footer>Cine Paradiso</footer>
+
+    <footer>
+        <div class="pie">
+            <div>
+                <h4>Cine Paradiso</h4>
+                <p>Viví los mejores estrenos en pantalla gigante. Sacá tus entradas hoy.</p>
+            </div>
+            <div>
+                <h4>Nuestras sedes</h4>
+                <p>Paradiso Centro - Av. Corrientes 1234</p>
+                <p>Paradiso Belgrano - Av. Cabildo 2050</p>
+                <p>Paradiso Palermo - Av. Santa Fe 3300</p>
+            </div>
+            <div>
+                <h4>Redes</h4>
+                <p><a href="https://facebook.com" target="_blank">Facebook</a> - <a href="https://instagram.com" target="_blank">Instagram</a></p>
+                <p><a href="https://github.com" target="_blank">GitHub</a></p>
+            </div>
+        </div>
+        <p class="copy">&copy; 2026 Cine Paradiso - Introducción al Desarrollo de Software</p>
+    </footer>
+    <script src="{{ url_for('static', filename='js/a1.js') }}"></script>
 </body>
 </html>
