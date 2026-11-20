@@ -13,6 +13,7 @@ from source.routes.sedes import sede_bp
 from source.routes.funciones import funcion_bp
 from source.routes.salas import sala_bp
 from source.routes.reservas import reserva_bp
+from source.routes.estadisticas import estadistica_bp
 
 from errors_code import ERROR_CLIENTE, ERROR_SERVIDOR
 from source.auth import verificar_api_key
@@ -46,6 +47,7 @@ app.register_blueprint(sede_bp,     url_prefix="/api")
 app.register_blueprint(funcion_bp,  url_prefix="/api")
 app.register_blueprint(sala_bp,     url_prefix="/api")
 app.register_blueprint(reserva_bp,  url_prefix="/api")
+app.register_blueprint(estadistica_bp, url_prefix="/api")
 
 #Api externa
 #app.before_request(verificar_api_key)
