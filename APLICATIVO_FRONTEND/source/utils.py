@@ -19,8 +19,7 @@ def tomar_campos(origen, campos:tuple):
 
 def verificar_sesion(rol:str=None):
     if not token_sesion():
-        if request.path != "/":
-            flash("Inicia sesion para continuar", "error")
+        flash("Inicia sesion para continuar", "error")
         return redirect(url_for("usuarios_bp.login", siguiente=request.path))
     if rol and session.get("rol") != rol:
         flash(f"Esa pagina es solo para {rol}", "error")

@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request
 from source import formato
+from source.config import SEDES
 #from source.usuarios import usuarios_bp
 #from source.cartelera import cartelera_bp
 #from source.reservas import reservas_bp
@@ -26,13 +27,15 @@ app.add_template_filter(formato.filtro_dinero, "dinero")
 @app.context_processor
 def inyectar_seccion():
     seccion = "cartelera"
-    if request.path.startswith("/admin") or request.path.endswith("/usar"):
+    if request.path == "/":
+        seccion = "inicio"
+    elif request.path.startswith("/admin") or request.path.endswith("/usar"):
         seccion = "admin"
     elif request.path.startswith("/mis-reservas") or request.path.startswith("/comprar") or request.path.endswith("/cancelar"):
         seccion = "reservas"
     elif request.path.startswith("/perfil"):
         seccion = "perfil"
-    return dict(seccion=seccion)
+    return dict(seccion=seccion, sedes_cine=SEDES)
 
 if __name__ == "__main__":
     puerto = int(os.getenv("PORT_APLICATIVO_FRONTEND", 5002))

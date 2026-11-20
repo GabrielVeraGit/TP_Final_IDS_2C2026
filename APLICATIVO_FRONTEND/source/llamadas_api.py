@@ -8,6 +8,12 @@ def url_api():
     puerto = os.getenv("PORT_API_BACKEND", "5001")
     return f"http://localhost:{puerto}/api"
 
+def armar_headers():
+    clave = os.getenv("API_KEY")
+    if clave:
+        return {"X-API-KEY": clave}
+    return dict()
+
 def descripcion_error(cuerpo, codigo:int):
     try:
         return cuerpo["errors"][0]["description"]
@@ -28,17 +34,18 @@ def llamar_api(metodo:str, ruta:str, token:str=None, datos:dict=None, params:dic
     if token:
         cookies[NOMBRE_COOKIE] = token
     try:
-        respuesta = requests.request(metodo, url_api() + ruta, json=datos, params=params, cookies=cookies, timeout=TIMEOUT_SEG)
+        respuesta = requests.request(metodo, url_api() + ruta, json=datos, params=params, cookies=cookies, headers=armar_headers(), timeout=TIMEOUT_SEG)
     except requests.exceptions.RequestException:
         return True, "No se pudo conectar con la API", 503
     return armar_resultado(respuesta)
 
 def iniciar_sesion_api(email:str, password:str):
     try:
-        respuesta = requests.post(url_api() + "/user/login", json={"email": email, "password": password}, timeout=TIMEOUT_SEG)
+        respuesta = requests.request(metodo, url_api() + ruta, json=datos, params=params, cookies=cookies, headers=armar_headers(), timeout=TIMEOUT_SEG)
     except requests.exceptions.RequestException:
         return True, "No se pudo conectar con la API", 503
     error, cuerpo, codigo = armar_resultado(respuesta)
     if error:
         return True, cuerpo, codigo
     return False, respuesta.cookies.get(NOMBRE_COOKIE), codigo
+

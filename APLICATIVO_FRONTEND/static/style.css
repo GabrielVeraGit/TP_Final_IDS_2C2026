@@ -114,6 +114,16 @@ footer { background: var(--tarjeta); border-top: 1px solid var(--borde); color: 
 .pie a { color: var(--gris); }
 .copy { text-align: center; padding: 0 16px 16px; font-size: 0.85em; }
 
+/* inicio */
+.hero { text-align: center; padding: 30px 16px; margin-bottom: 24px; background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 8px; }
+.hero h1 { font-size: 2.2em; }
+.hero h1 span { color: var(--rojo); }
+.botones { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 14px; }
+.pasos { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.pasos .caja { margin-bottom: 0; }
+.pasos b { color: var(--rojo); }
+.separado { margin-top: 28px; }
+
 /*tablet*/
 @media (max-width: 900px) {
     .dos-col { grid-template-columns: 1fr; }

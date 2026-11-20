@@ -12,7 +12,8 @@
             <a class="marca" href="/">Cine <span>Paradiso</span></a>
             <button id="boton-menu" type="button">Menu</button>
             <nav id="menu">
-                <a href="/" class="{{ 'activo' if seccion == 'cartelera' }}">Cartelera</a>
+                <a href="/" class="{{ 'activo' if seccion == 'inicio' }}">Inicio</a>
+                <a href="/cartelera" class="{{ 'activo' if seccion == 'cartelera' }}">Cartelera</a>
                 {% if session.get('token') %}
                     {% if session.get('rol') == 'admin' %}
                         <a href="/admin" class="{{ 'activo' if seccion == 'admin' }}">Backoffice</a>
@@ -48,9 +49,9 @@
             </div>
             <div>
                 <h4>Nuestras sedes</h4>
-                <p>Paradiso Centro - Av. Corrientes 1234</p>
-                <p>Paradiso Belgrano - Av. Cabildo 2050</p>
-                <p>Paradiso Palermo - Av. Santa Fe 3300</p>
+                {% for nombre, direccion in sedes_cine %}
+                <p>{{ nombre }} - {{ direccion }}</p>
+                {% endfor %}
             </div>
             <div>
                 <h4>Redes</h4>
