@@ -1,0 +1,9 @@
+{# poster: si la pelicula no tiene un link valido muestra el titulo #}
+
+{% macro poster(pelicula) -%}
+{% if pelicula.poster and pelicula.poster.startswith('http') %}
+    <img class="poster" src="{{ pelicula.poster }}" alt="Poster de {{ pelicula.titulo }}">
+{% else %}
+    <div class="sin-poster">{{ pelicula.titulo }}</div>
+{% endif %}
+{%- endmacro %}

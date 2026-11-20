@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block contenido %}
+<h1>Registrarse</h1>
+<form class="formulario" method="post" action="/registro">
+    <label>Nombre <input type="text" name="nombre" required></label>
+    <label>Apellido <input type="text" name="apellido" required></label>
+    <label>Email <input type="email" name="email" required></label>
+    <label>Contrasenia <input type="password" name="password" required></label>
+    <button type="submit">Crear cuenta</button>
+</form>
+<p class="chico">Dominios permitidos: gmail.com, yahoo.com, hotmail.com, fi.uba.ar</p>
+{% endblock %}

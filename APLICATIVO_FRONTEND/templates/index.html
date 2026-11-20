@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block contenido %}
+<h1>Cartelera</h1>
+<form class="filtros" method="get" action="/">
+    <input type="text" name="titulo" placeholder="Titulo" value="{{ filtros.get('titulo', '') }}">
+    <input type="text" name="genero" placeholder="Genero" value="{{ filtros.get('genero', '') }}">
+    <button type="submit">Buscar</button>
+</form>
+{% if peliculas %}
+<div class="grilla">
+    {% for p in peliculas %}
+    <a class="tarjeta" href="/pelicula/{{ p.id_pelicula }}">
+        {% if p.poster and p.poster.startswith('http') %}
+            <img src="{{ p.poster }}" alt="Poster de {{ p.titulo }}">
+        {% else %}
+            <div class="sin-poster">Sin poster</div>
+        {% endif %}
+        <h3>{{ p.titulo }}</h3>
+        <p class="chico">{{ p.genero or '' }}</p>
+        <p class="chico">{{ p.duracion or '' }} {% if p.clasificacion %}| {{ p.clasificacion }}{% endif %}</p>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<p>No hay peliculas en cartelera.</p>
+{% endif %}
+{% endblock %}
