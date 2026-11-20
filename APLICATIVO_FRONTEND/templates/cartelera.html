@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "_pelicula_macros.html" import poster %}
+{% block titulo %}Cartelera{% endblock %}
+{% block contenido %}
+<h1>Cartelera</h1>
+<p class="gris">Elegí una película para ver sus funciones y reservar tus entradas.</p>
+
+<form class="buscador" method="get" action="/cartelera">
+    <input type="text" name="titulo" placeholder="Buscar por título" value="{{ filtros.get('titulo', '') }}">
+    {% if filtros.get('genero') %}<input type="hidden" name="genero" value="{{ filtros.get('genero') }}">{% endif %}
+    <button type="submit">Buscar</button>
+</form>
+
+{% if generos %}
+<div class="generos">
+    <a href="/cartelera{{ '?titulo=' ~ filtros.get('titulo') if filtros.get('titulo') }}" class="{{ 'activo' if not filtros.get('genero') }}">Todos</a>
+    {% for g in generos %}
+        <a href="/cartelera?genero={{ g | urlencode }}{{ '&titulo=' ~ (filtros.get('titulo') | urlencode) if filtros.get('titulo') }}" class="{{ 'activo' if filtros.get('genero') == g }}">{{ g }}</a>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if peliculas %}
+<div class="grilla">
+    {% for p in peliculas %}
+    <a class="tarjeta" href="/pelicula/{{ p.id_pelicula }}">
+        {{ poster(p) }}
+        <div class="cuerpo">
+            <h3>{{ p.titulo }}</h3>
+            <p class="gris">{{ p.genero or '' }}</p>
+            <p class="gris">{{ p.duracion or '' }}{% if p.clasificacion %} | {{ p.clasificacion }}{% endif %}</p>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<p>No se encontraron películas.</p>
+{% endif %}
+{% endblock %}

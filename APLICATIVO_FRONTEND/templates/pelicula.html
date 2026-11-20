@@ -1,50 +1,76 @@
 {% extends "base.html" %}
+{% from "_pelicula_macros.html" import poster %}
 {% block titulo %}{{ pelicula.titulo }}{% endblock %}
 {% block contenido %}
-<div class="detalle">
-    {% if pelicula.poster and pelicula.poster.startswith('http') %}
-        <img src="{{ pelicula.poster }}" alt="Poster de {{ pelicula.titulo }}">
-    {% endif %}
-    <div>
+<p class="gris"><a href="/">Cartelera</a> &gt; {{ pelicula.titulo }}</p>
+
+<div class="caja detalle">
+    <div class="imagen">{{ poster(pelicula) }}</div>
+    <div class="info">
         <h1>{{ pelicula.titulo }} ({{ pelicula.anio }})</h1>
-        <p class="chico">{{ pelicula.genero }} | {{ pelicula.duracion }} | {{ pelicula.clasificacion }}</p>
-        <p><b>Director:</b> {{ pelicula.director }}</p>
-        <p><b>Actores:</b> {{ pelicula.actores }}</p>
-        <p>{{ pelicula.sinopsis }}</p>
+        <p>
+            {% if pelicula.genero %}<span class="etiqueta">{{ pelicula.genero }}</span>{% endif %}
+            {% if pelicula.duracion %}<span class="etiqueta">{{ pelicula.duracion }}</span>{% endif %}
+            {% if pelicula.clasificacion %}<span class="etiqueta">{{ pelicula.clasificacion }}</span>{% endif %}
+        </p>
+        <p>{{ pelicula.sinopsis or 'Sin sinopsis disponible.' }}</p>
+        <p><b>Director:</b> {{ pelicula.director or '-' }}</p>
+        {% if actores %}<p><b>Actores:</b> {{ actores | join(', ') }}</p>{% endif %}
     </div>
 </div>
 
-<h2>Funciones disponibles</h2>
-{% if funciones %}
-<div class="tabla-scroll">
-<table class="apilable">
-    <tr class="cabecera"><th>Fecha y hora</th><th>Sede</th><th>Sala</th><th>Precio</th><th>Entradas libres</th><th>Comprar</th></tr>
+<div class="caja" id="funciones">
+    <h2>Funciones disponibles</h2>
+
+    {% if sedes|length > 1 %}
+    <form method="get" action="/pelicula/{{ pelicula.id_pelicula }}#funciones">
+        {% if dia %}<input type="hidden" name="dia" value="{{ dia }}">{% endif %}
+        <label>Sede
+            <select name="sede" data-autoenviar>
+                <option value="">Todas las sedes</option>
+                {% for s in sedes %}
+                <option value="{{ s.id_sede }}" {{ 'selected' if sede == s.id_sede }}>{{ s.nombre }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <noscript><button type="submit">Filtrar</button></noscript>
+    </form>
+    {% endif %}
+
+    {% if dias %}
+    <div class="dias">
+        <a href="/pelicula/{{ pelicula.id_pelicula }}{{ '?sede=' ~ sede if sede }}#funciones" class="{{ 'activo' if not dia }}">Todos los días</a>
+        {% for d in dias %}
+        <a href="/pelicula/{{ pelicula.id_pelicula }}?dia={{ d.fecha }}{{ '&sede=' ~ sede if sede }}#funciones" class="{{ 'activo' if dia == d.fecha }}">{{ d.nombre }} {{ d.numero }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     {% for f in funciones %}
-    <tr>
-        <td data-label="Fecha y hora">{{ f.fecha_hora }}</td>
-        <td data-label="Sede">{{ f.sede }}</td>
-        <td data-label="Sala">{{ f.sala }}</td>
-        <td data-label="Precio">${{ "%.2f"|format(f.precio_entrada) }}</td>
-        <td data-label="Entradas libres">{{ f.entradas_disponibles }} de {{ f.capacidad }}</td>
-        <td data-label="Comprar">
+    <div class="funcion">
+        <div>
+            <span class="hora">{{ f.fecha_hora | hora }}</span>
+            <span class="gris">{{ f.fecha_hora | dia_corto }}</span>
+            <p class="gris">{{ f.sede }} - {{ f.sala }}</p>
+        </div>
+        <div>
+            <span class="precio">{{ f.precio_entrada | dinero }}</span>
+            <span class="gris">| {{ f.entradas_disponibles }} libres</span>
+        </div>
+        <div>
             {% if f.entradas_disponibles <= 0 %}
-                Agotada
+                <span class="gris">Agotada</span>
             {% elif session.get('rol') == 'cliente' %}
-                <form class="en-linea" method="post" action="/comprar/{{ f.id_funcion }}">
-                    <input type="number" name="cant_entradas" value="1" min="1" max="{{ [10, f.entradas_disponibles]|min }}" class="chico-input">
-                    <button type="submit">Comprar</button>
-                </form>
+                <a class="boton" href="/comprar/{{ f.id_funcion }}">Comprar</a>
             {% elif session.get('rol') == 'admin' %}
-                Solo clientes
+                <span class="gris">Solo clientes</span>
             {% else %}
-                <a href="/login?siguiente=/pelicula/{{ pelicula.id_pelicula }}">Ingresa para comprar</a>
+                <a class="boton gris-b" href="/login?siguiente=/pelicula/{{ pelicula.id_pelicula }}">Ingresá para comprar</a>
             {% endif %}
-        </td>
-    </tr>
+        </div>
+    </div>
+    {% else %}
+    <p>No hay funciones programadas.</p>
     {% endfor %}
-</table>
 </div>
-{% else %}
-<p>No hay funciones programadas para esta pelicula.</p>
-{% endif %}
 {% endblock %}

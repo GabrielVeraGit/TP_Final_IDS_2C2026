@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "_pelicula_macros.html" import poster %}
+{% block titulo %}Inicio{% endblock %}
+{% block contenido %}
+<div class="hero">
+    <h1>Viví el cine en <span>Paradiso</span></h1>
+    <p class="gris">Reservá tus entradas online y recibí el código QR en tu mail.</p>
+    <div class="botones">
+        {% if session.get('token') %}
+            {% if session.get('rol') == 'admin' %}
+                <a class="boton" href="/admin">Ir al backoffice</a>
+            {% else %}
+                <a class="boton" href="/cartelera">Ver la cartelera</a>
+                <a class="boton gris-b" href="/mis-reservas">Mis reservas</a>
+            {% endif %}
+        {% else %}
+            <a class="boton" href="/login">Ingresar</a>
+            <a class="boton gris-b" href="/registro">Registrarse</a>
+        {% endif %}
+    </div>
+</div>
+
+<h2>Películas disponibles</h2>
+<p class="gris">Ingresá para ver las funciones, los horarios y comprar tus entradas.</p>
+{% if peliculas %}
+<div class="grilla">
+    {% for p in peliculas %}
+    <a class="tarjeta" href="/pelicula/{{ p.id_pelicula }}">
+        {{ poster(p) }}
+        <div class="cuerpo">
+            <h3>{{ p.titulo }}</h3>
+            <p class="gris">{{ p.genero or '' }}</p>
+            <p class="gris">{{ p.duracion or '' }}{% if p.clasificacion %} | {{ p.clasificacion }}{% endif %}</p>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% elif mensaje %}
+<p class="gris">No pudimos cargar las películas en este momento ({{ mensaje }}).</p>
+{% else %}
+<p class="gris">Por ahora no hay películas disponibles.</p>
+{% endif %}
+
+<h2 class="separado">Cómo comprar</h2>
+<div class="pasos">
+    <div class="caja"><b>1.</b> Registrate o ingresá a tu cuenta.</div>
+    <div class="caja"><b>2.</b> Elegí la película, la sede y el horario.</div>
+    <div class="caja"><b>3.</b> Confirmá tu compra (hasta {{ max_entradas }} entradas).</div>
+    <div class="caja"><b>4.</b> Recibí el QR por mail y mostralo en la sala.</div>
+</div>
+<p class="gris">Podés cancelar tu reserva hasta {{ horas_limite }} horas antes de la función.</p>
+
+<h2 class="separado">Nuestras sedes</h2>
+<div class="pasos">
+    {% for nombre, direccion in sedes_cine %}
+    <div class="caja"><h3>{{ nombre }}</h3><p class="gris">{{ direccion }}</p></div>
+    {% endfor %}
+</div>
+{% endblock %}
