@@ -5,7 +5,7 @@ from source import formato
 from source.config import SEDES
 #from source.usuarios import usuarios_bp
 #from source.cartelera import cartelera_bp
-from source.reservas import reservas_bp
+from source.routes.reservas import reservas_bp
 #from source.admin import admin_bp
 #saquen el # cuando hayan creado el archivo y su bp!
 
@@ -39,4 +39,4 @@ def inyectar_seccion():
 
 if __name__ == "__main__":
     puerto = int(os.getenv("PORT_APLICATIVO_FRONTEND", 5002))
-    app.run(port=puerto, debug=False)
+    app.run(port=puerto, debug=True)
