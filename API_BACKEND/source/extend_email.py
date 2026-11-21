@@ -43,7 +43,8 @@ def send_reserva(qr_id:str, url_cancelar:str, qr_buffer, identificador:str, regi
                                 fecha_funcion=registro["fecha_hora"], 
                                 sala=registro["name_sala"], 
                                 sede=registro["name_sede"],
-                                direccion=registro["direccion_sede"] )
+                                direccion=registro["direccion_sede"],
+                                cant_entradas=registro["cant_entradas"] )
 
         msg.attach(
                     filename=f"{qr_id}.png",

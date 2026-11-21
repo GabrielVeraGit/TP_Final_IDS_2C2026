@@ -8,7 +8,7 @@ API_KEY = os.getenv("API_KEY", "")
 OMDB_API_KEY = os.getenv("OMDB_API_KEY", "")
 OMDB_URL = "https://www.omdbapi.com/"
 
-URL_FRONTEND = "http://localhost:" + os.getenv("PORT_APLICATIVO_FRONTEND", "5002")
+URL_FRONTEND = "http://localhost:"+os.getenv("PORT_APLICATIVO_FRONTEND", "5002")+"/cine_paradiso"
 
 HORAS_LIMITE_CANCELACION = 2
 MAX_ENTRADAS_POR_RESERVA = 10
