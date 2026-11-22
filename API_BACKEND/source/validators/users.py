@@ -14,7 +14,7 @@ def validando_campos_registro():
     try:
         nombre=datos["nombre"].strip().title()
         apellido=datos["apellido"].strip().title()
-        email=datos["email"]
+        email=datos["email"].strip()
         password=datos["password"]
 
         for campo in [nombre, apellido]:

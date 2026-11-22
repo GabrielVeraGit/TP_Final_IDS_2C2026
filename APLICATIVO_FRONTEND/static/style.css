@@ -9,9 +9,19 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; font-family: Arial, Helvetica, sans-serif; background: var(--fondo); color: var(--texto); line-height: 1.5; }
+body { 
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--fondo);
+    color: var(--texto);
+    line-height: 1.5; }
+
 img { max-width: 100%; }
 a { color: var(--rojo); }
+.a.verde{ color: var(--verde); }
 h1, h2, h3 { margin: 0 0 10px; }
 h1 { font-size: 1.8em; }
 h2 { font-size: 1.3em; }
@@ -38,6 +48,7 @@ nav form { margin: 0; }
 
 /*botones y formularios*/
 button, .boton { display: inline-block; padding: 9px 16px; font: inherit; color: #fff; background: var(--rojo); border: none; border-radius: 6px; text-decoration: none; cursor: pointer; }
+button.verde, .boton.verde{ display: inline-block; padding: 9px 16px; font: inherit; color: #fff; background: var(--verde); border: none; border-radius: 6px; text-decoration: none; cursor: pointer; }
 button:hover, .boton:hover { opacity: 0.85; }
 button.gris-b, .boton.gris-b { background: #3a3a4d; }
 button.chico, .boton.chico { padding: 5px 10px; font-size: 0.85em; }

@@ -17,7 +17,8 @@ def validando_campos_reserva(datos_revisar:dict):
     "cant_entradas": utils_val.validar_entero,
     "estado_compra": utils_val.validar_texto,
     "fecha_desde": utils_val.validar_fecha_hora,
-    "fecha_hasta": utils_val.validar_fecha_hora
+    "fecha_hasta": utils_val.validar_fecha_hora,
+    "qr": utils_val.validar_texto
     }
 
     campos_limpios = dict()

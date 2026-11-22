@@ -9,36 +9,44 @@
 <body>
     <header>
         <div class="barra">
-            <a class="marca" href="/">Cine <span>Paradiso</span></a>
+            <a class="marca" href="{{ url_for('index') }}">Cine <span>Paradiso</span></a>
             <button id="boton-menu" type="button">Menu</button>
             <nav id="menu">
-                <a href="/" class="{{ 'activo' if seccion == 'inicio' }}">Inicio</a>
+                <a href="{{ url_for('index') }}" class="{{ 'activo' if seccion == 'inicio' }}">Inicio</a>
                 <a href="/cartelera" class="{{ 'activo' if seccion == 'cartelera' }}">Cartelera</a>
                 {% if session.get('token') %}
+                
                     {% if session.get('rol') == 'admin' %}
-                        <a href="/admin" class="{{ 'activo' if seccion == 'admin' }}">Backoffice</a>
+                        <a href="{{ url_for('user_bp.admin') }}" class="{{ 'activo' if seccion == 'admin' }}">Backoffice</a>
+                        <a href="{{ url_for('reserva_bp.usar', qr_id='none')}}" class="{{ 'activo' if seccion == 'checkin' }}">Check-in</a>
                     {% else %}
-                        <a href="/mis-reservas" class="{{ 'activo' if seccion == 'reservas' }}">Mis reservas</a>
-                        <a href="/perfil" class="{{ 'activo' if seccion == 'perfil' }}">Mi perfil</a>
+                        <a href="{{ url_for('reserva_bp.mis_reservas') }}" class="{{ 'activo' if seccion == 'reservas' }}">Mis reservas</a>
+                        <a href="{{url_for('user_bp.perfil')}}" class="{{ 'activo' if seccion == 'perfil' }}">Mi perfil</a>
+                        
                     {% endif %}
-                    <form method="post" action="/logout">
+
+                    <form method="POST" action="{{ url_for('user_bp.logout') }}">
                         <button type="submit" class="link">Salir ({{ session.get('email') }})</button>
                     </form>
+
                 {% else %}
-                    <a href="/login">Ingresar</a>
-                    <a href="/registro">Registrarse</a>
+                    <a href="{{ url_for('user_bp.login') }}">Ingresar</a>
+                    <a href="{{ url_for('user_bp.registro') }}">Registrarse</a>
                 {% endif %}
             </nav>
         </div>
     </header>
 
     <main>
+        
         {% with mensajes = get_flashed_messages(with_categories=true) %}
             {% for categoria, mensaje in mensajes %}
                 <div class="aviso {{ categoria }}">{{ mensaje }}</div>
             {% endfor %}
         {% endwith %}
-        {% block contenido %}{% endblock %}
+
+        {% block contenido %}
+        {% endblock %}
     </main>
 
     <footer>

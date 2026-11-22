@@ -71,6 +71,8 @@ def create_reserva():
     if error:
         return respuesta
 
+    registro["cant_entradas"]=body_limpio["cant_entradas"]
+    
     qr_buffer = extend_qr.generar_qr_en_memoria(url_usar)
     error, result = extend_email.send_reserva(qr_id, url_cancelar, qr_buffer, identificador, registro)
     if error:

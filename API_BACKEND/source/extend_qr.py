@@ -4,6 +4,7 @@ import qrcode
 from source.utils import config
 
 
+
 def generar_qr_en_memoria(contenido_url: str):
     qr = qrcode.QRCode(
         version=1,
@@ -26,7 +27,7 @@ def generar_qr_en_memoria(contenido_url: str):
 def generar_code_y_urls():
     qr_id = f"QR_ID-{uuid.uuid4().hex[:10].upper()}"
 
-    url_usar = f"{config.URL_FRONTEND}/reserva/{qr_id}/usar" #va al qr
-    url_cancelar = f"{config.URL_FRONTEND}/reserva/{qr_id}/cancelar" #va al boton
+    url_usar = f"{config.URL_FRONTEND}/reservas/{qr_id}/usar" #va al qr
+    url_cancelar = f"{config.URL_FRONTEND}/reservas/{qr_id}/cancelar" #va al boton
     
     return qr_id, url_usar, url_cancelar

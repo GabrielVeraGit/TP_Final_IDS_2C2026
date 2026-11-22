@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from decimal import Decimal
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, request
 
 from werkzeug.exceptions import HTTPException
 from source import extend_email, extend_jwt
@@ -68,9 +68,9 @@ def manejar_error_interno(error:Exception):
 
 @app.route("/api", methods=["GET"])
 def index():
-    return "ENTRASTE A LA API", 200
+    return f"ENTRASTE A LA API con {request.host_url}", 200
 
 
 if __name__ == "__main__":
     puerto=int(os.getenv("PORT_API_BACKEND", 5001))
-    app.run(port=puerto, debug=False)
+    app.run(port=puerto, host="0.0.0.0", debug=True)
