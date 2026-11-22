@@ -28,12 +28,12 @@ def comprar(id_funcion):
     error, respuesta, codigo = utils.llamar("POST", "/reservas", datos=datos)
 
     if error:
-        return utils.manejar_error(respuesta, codigo, "/")
+        return utils.manejar_error(respuesta, codigo, url_for('index'))
 
     flash(respuesta.get("message", "Reserva realizada correctamente"), "success")
     return redirect(url_for('index'))
 
-@reserva_bp.route("/mis-reservas")
+@reserva_bp.route("/mis-reservas", methods=["GET"])
 def mis_reservas():
     acceso = utils.verificar_sesion("cliente")
     if acceso:
@@ -42,7 +42,7 @@ def mis_reservas():
     error, respuesta, codigo = utils.llamar("GET", "/reservas")
 
     if error:
-        return utils.manejar_error(respuesta, codigo, "/")
+        return utils.manejar_error(respuesta, codigo, url_for('index'))
 
     reservas = respuesta.get("registros", [])
 
@@ -58,23 +58,44 @@ def cancelar(qr_id):
     error, respuesta, codigo = utils.llamar("PUT", f"/reservas/{qr_id}/cancelar")
 
     if error:
-        return utils.manejar_error(respuesta, codigo, "/mis-reservas")
+        return utils.manejar_error(respuesta, codigo, url_for('reserva_bp.mis_reservas'))
 
     flash("Reserva cancelada correctamente", "success")
     return redirect(url_for('reserva_bp.mis_reservas'))
 
 
-    
-@reserva_bp.route("/reservas/<string:qr_id>/usar", methods=["GET","POST"])#falta
-def cancelar(qr_id):
+@reserva_bp.route("/reservas/<string:qr_id>/usar", methods=["GET", "POST"])
+def usar(qr_id):
     acceso = utils.verificar_sesion("admin")
     if acceso:
         return acceso
+    
+    qr_id_buscado=request.args.get("QR-ID", None)
+    if qr_id_buscado:
+        return redirect(url_for('reserva_bp.usar', qr_id=qr_id_buscado.upper()))
+    
+    if qr_id != "none":#si -> buscamos qr_id
 
-    error, respuesta, codigo = utils.llamar("PUT", f"/reservas/{qr_id}/usar")
+        error, respuesta, codigo = utils.llamar("GET", "/reservas", params={"qr":qr_id})
+        if error:
+            return utils.manejar_error(respuesta, codigo, url_for('reserva_bp.usar', qr_id="none"))
+        elif len(respuesta["registros"])==0:
+            return utils.manejar_error("QR-ID NOT FOUND", 404, url_for('reserva_bp.usar', qr_id="none"))
+        
+        if request.method == "POST":
+            error, respuesta, codigo = utils.llamar("PUT", f"/reservas/{qr_id}/usar")
+            if error:
+                return utils.manejar_error(respuesta, codigo, url_for('reserva_bp.usar', qr_id="none"))
+            
+            flash(f"Reserva {qr_id} fue usada!")
+            return redirect(url_for('reserva_bp.usar', qr_id="none"))
+        
+        return render_template('check_in.html', qr_id=qr_id, registros=respuesta["registros"][0])
+    else:
+        return render_template('check_in.html', qr_id=qr_id)
 
-    if error:
-        return utils.manejar_error(respuesta, codigo, "/mis-reservas")
 
-    flash("Reserva cancelada correctamente", "success")
-    return redirect(url_for('reserva_bp.mis_reservas'))
+
+
+        
+

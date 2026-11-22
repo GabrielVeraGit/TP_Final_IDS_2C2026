@@ -46,8 +46,10 @@ def inyectar_seccion():
     seccion = "cartelera"
     if request.path == "/cine_paradiso":
         seccion = "inicio"
-    elif request.path.startswith("/cine_paradiso/admin") or request.path.endswith("/cine_paradiso/usar"):
+    elif request.path.startswith("/cine_paradiso/admin"):
         seccion = "admin"
+    elif request.path.endswith("/usar"):
+        seccion = "checkin"
     elif request.path.startswith("/cine_paradiso/mis-reservas") or request.path.startswith("/cine_paradiso/comprar") or request.path.endswith("/cine_paradiso/cancelar"):
         seccion = "reservas"
     elif request.path.startswith("/cine_paradiso/perfil"):
@@ -56,4 +58,4 @@ def inyectar_seccion():
 
 if __name__ == "__main__":
     puerto = int(os.getenv("PORT_APLICATIVO_FRONTEND", 5002))
-    app.run(port=puerto, debug=True)
+    app.run(port=puerto, host="0.0.0.0", debug=True)

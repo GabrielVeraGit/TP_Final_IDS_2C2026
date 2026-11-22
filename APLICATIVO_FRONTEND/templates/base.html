@@ -18,6 +18,7 @@
                 
                     {% if session.get('rol') == 'admin' %}
                         <a href="{{ url_for('user_bp.admin') }}" class="{{ 'activo' if seccion == 'admin' }}">Backoffice</a>
+                        <a href="{{ url_for('reserva_bp.usar', qr_id='none')}}" class="{{ 'activo' if seccion == 'checkin' }}">Check-in</a>
                     {% else %}
                         <a href="{{ url_for('reserva_bp.mis_reservas') }}" class="{{ 'activo' if seccion == 'reservas' }}">Mis reservas</a>
                         <a href="{{url_for('user_bp.perfil')}}" class="{{ 'activo' if seccion == 'perfil' }}">Mi perfil</a>
@@ -37,12 +38,15 @@
     </header>
 
     <main>
+        
         {% with mensajes = get_flashed_messages(with_categories=true) %}
             {% for categoria, mensaje in mensajes %}
                 <div class="aviso {{ categoria }}">{{ mensaje }}</div>
             {% endfor %}
         {% endwith %}
-        {% block contenido %}{% endblock %}
+
+        {% block contenido %}
+        {% endblock %}
     </main>
 
     <footer>
