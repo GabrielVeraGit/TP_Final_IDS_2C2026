@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmación de Reserva</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+    <h2>¡Reserva Confirmada!</h2>
+    <p>Tu reserva ha sido registrada con los siguientes datos:</p>
+
+    <ul>
+        <li><strong>Sede:</strong> {{ sede }}</li>
+        <li><strong>Dirección:</strong> {{ direccion }}</li>
+        <li><strong>Sala:</strong> {{ sala }}</li>
+        <li><strong>Fecha y hora:</strong> {{ fecha_funcion }}</li>
+        <li><strong>Código de reserva:</strong> {{ qr }}</li>
+        <li><strong>Cantidad de entradas:</strong> {{ cant_entradas }}</li>
+    </ul>
+
+    <p>Presenta este código QR al ingresar:</p>
+    <img src="cid:qr_reserva" alt="Código QR de Reserva" width="200" height="200" style="border: 1px solid #ccc; padding: 8px;" />
+
+    <p style="margin-top: 20px;">
+        Si deseas cancelar tu reserva, puedes hacerlo desde el siguiente enlace:<br>
+        <a href="{{ cancelar_url_boton }}">Cancelar reserva</a>
+    </p>
+</body>
+</html>

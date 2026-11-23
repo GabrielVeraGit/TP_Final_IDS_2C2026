@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block titulo %}Check-In{% endblock %}
+{% block contenido %}
+
+{%if qr_id=="none"%}
+    <h2>Escane un QR para iniciar el CHECK-IN o Ingrese manualmente el QR_ID</h2>
+  
+    <form action="{{ url_for('reserva_bp.usar', qr_id='none') }}" method="GET">
+        <label>QR-ID <input type="text" name="QR-ID" required></label>
+        <button class="verde" type="submit">Buscar</button>
+    </form>
+
+
+{%elif qr_id!="none" and registros%}
+    
+    <p>Reserva: {{qr_id}}</p>
+    <p >Estado: {{registros["estado_compra"].upper()}}</p>
+    <ul>
+        <li><strong>ID :</strong> {{ registros["id_reserva"] }}</li>
+        <li><strong>ID FUNCION:</strong> {{ registros["id_funcion"] }}</li>
+        <li><strong>ID USUARIO:</strong> {{ registros["id_usuario"] }}</li>
+        <li><strong>FECHA HORA COMPRA:</strong> {{ registros["fecha_de_compra"] }}</li>
+        <li><strong>CANTIDAD ENTRADAS:</strong> {{ registros["cant_entradas"] }}</li>
+    </ul>
+    {%if registros["estado_compra"] not in ("cancelada","usada")%}
+        <form class="en-linea" action="{{ url_for('reserva_bp.usar', qr_id=qr_id) }}" method="POST">
+            <button class="verde" type="submit">Confirmar Check-In</button>
+        </form>
+    {%endif%}
+        <form class="en-linea" action="{{ url_for('reserva_bp.usar', qr_id='none') }}" method="POST">
+            <button type="submit">Regresar</button>
+        </form>
+{%endif%}
+
+
+
+
+{% endblock %}

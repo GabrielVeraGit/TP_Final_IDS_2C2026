@@ -1,7 +1,7 @@
 #!/bin/bash
 func_menu(){
     echo "Crear Entornos Virtuales e Instalar dependencias ------- 1  (API & APLICATIVO)"
-    echo "Crear .env e ingresar las variables para Base de Datos - 2  (API & APLICATIVO)"
+    echo "Crear .env e ingresar las variables de entorno --------- 2  (API & APLICATIVO)"
     echo "Crear Estructura_General de la DB MySQL ---------------- 3  (API)"
     echo "ELIMINAR Estructura de la DB MySQL --------------------- 4  (API)"
     echo "Lanzar API & APLICATIVO -------------------------------- 5  "
@@ -44,6 +44,7 @@ crear_entorno_virtual(){
 
 crear_ingresar_env(){
     password_incorrecta="si"
+    email_incorrecto="si"
     if [[ -f "./API_BACKEND/.env" && -f "./APLICATIVO_FRONTEND/.env" ]];then
         echo "Ya existen"
     else
@@ -62,11 +63,48 @@ crear_ingresar_env(){
             fi
         done
 
-        cp ./.env.example ./API_BACKEND/.env
+        # Expresión regular estándar y compatible con Bash para validar emails
+        regex_email="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+        while [[ "${email_incorrecto}" == "si" ]];do
+            read -p "EMAIL_REMITENTE=" email
+            if [[ "$email" =~ $regex_email ]]; then
+                email_incorrecto="no"
+            else
+                echo "El email NO es válido"
+            fi
+        done
+ 
+        regex_password="^[a-z]{16}$"
+        password_incorrecta="si"
+        while [[ "${password_incorrecta}" == "si" ]];do
+            read -p "PASSWORD_REMITENTE=" pass_remitente
+            if [[ "$pass_remitente" =~ $regex_password ]]; then
+                password_incorrecta="no"
+            else
+                echo "La contraseña NO es válida. Debe tener 16 letras minúsculas y sin espacios."
+            fi
+        done
+
+        regex_duracion_token="^[1-9][0-9]*$"
+        duracion_token_incorrecta="si"
+        while [[ "${duracion_token_incorrecta}" == "si" ]];do
+            read -p "TOKEN_DURACION_MIN=" duracion_token
+            if [[ "$duracion_token" =~ $regex_duracion_token ]]; then
+                duracion_token_incorrecta="no"
+            else
+                echo "La duracion debe ser solo numeros, expresion en minutos"
+            fi
+        done
+        cp ./.env.back.example ./API_BACKEND/.env
         sed -i "s/DB_USER=tu_usuario_aqui/DB_USER=${db_user}/" ./API_BACKEND/.env
         sed -i "s/DB_PASSWORD=tu_contrasenia_aqui/DB_PASSWORD=${db_password}/" ./API_BACKEND/.env
+        sed -i "s/EMAIL_REMITENTE=tu_email_aqui/EMAIL_REMITENTE=${email}/" ./API_BACKEND/.env
+        sed -i "s/PASSWORD_REMITENTE=codigo_16_caracteres/PASSWORD_REMITENTE=${pass_remitente}/" ./API_BACKEND/.env
+        sed -i "s/BACK_TOKEN_SECRET_KEY=key_super_secreta/BACK_TOKEN_SECRET_KEY=${pass_remitente}/" ./API_BACKEND/.env
+        sed -i "s/BACK_TOKEN_DURACION=duracion_minutos/BACK_TOKEN_DURACION=${duracion_token}/" ./API_BACKEND/.env
 
-        grep "PORT_APLICATIVO_FRONTEND" ./.env.example >> ./APLICATIVO_FRONTEND/.env
+        cp ./.env.front.example ./APLICATIVO_FRONTEND/.env
+        sed -i "s/FRONT_SECRET_KEY=key_super_secreta/FRONT_SECRET_KEY=${pass_remitente}/" ./APLICATIVO_FRONTEND/.env
         echo "EXITO!"
 
     fi

@@ -19,3 +19,30 @@ python-dotenv==1.2.3
 #para poder conectarse con el motor mysql
 #  (con .venv activo): pip install mysql-connector-python
 mysql-connector-python==26.7.0
+dnspython==2.9.2
+
+#Para la validación de sintaxis y existencia de correos electrónicos
+#(con .venv activo): pip install email-validator
+email-validator==2.3.0
+idna==3.20
+
+#Para el envio de emails 
+#(con .venv activo): pip install Flask-Mail
+Flask-Mail==0.10.0
+
+#para consumir la API externa de peliculas OMDb (https://www.omdbapi.com/)
+#  (con .venv activo): pip install requests
+requests==2.34.2
+certifi==2026.10.23
+charset-normalizer==3.5.2
+urllib3==2.8.0
+
+#para generar los codigos QR de las compras (pillow genera la imagen PNG)
+#  (con .venv activo): pip install qrcode pillow
+qrcode==8.2
+pillow==13.0.0
+
+#para generar los tokens y cookies
+#(con .venv activo): pip install Flask-JWT-Extended
+PyJWT==2.15.1
+Flask-JWT-Extended==4.7.4

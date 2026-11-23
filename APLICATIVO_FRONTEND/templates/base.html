@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block titulo %}Cine Paradiso{% endblock %} - Cine Paradiso</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="barra">
+            <a class="marca" href="{{ url_for('index') }}">Cine <span>Paradiso</span></a>
+            <button id="boton-menu" type="button">Menu</button>
+            <nav id="menu">
+                <a href="{{ url_for('index') }}" class="{{ 'activo' if seccion == 'inicio' }}">Inicio</a>
+                <a href="/cartelera" class="{{ 'activo' if seccion == 'cartelera' }}">Cartelera</a>
+                {% if session.get('token') %}
+                
+                    {% if session.get('rol') == 'admin' %}
+                        <a href="{{ url_for('user_bp.admin') }}" class="{{ 'activo' if seccion == 'admin' }}">Backoffice</a>
+                        <a href="{{ url_for('reserva_bp.usar', qr_id='none')}}" class="{{ 'activo' if seccion == 'checkin' }}">Check-in</a>
+                    {% else %}
+                        <a href="{{ url_for('reserva_bp.mis_reservas') }}" class="{{ 'activo' if seccion == 'reservas' }}">Mis reservas</a>
+                        <a href="{{url_for('user_bp.perfil')}}" class="{{ 'activo' if seccion == 'perfil' }}">Mi perfil</a>
+                        
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('user_bp.logout') }}">
+                        <button type="submit" class="link">Salir ({{ session.get('email') }})</button>
+                    </form>
+
+                {% else %}
+                    <a href="{{ url_for('user_bp.login') }}">Ingresar</a>
+                    <a href="{{ url_for('user_bp.registro') }}">Registrarse</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+            {% for categoria, mensaje in mensajes %}
+                <div class="aviso {{ categoria }}">{{ mensaje }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        {% block contenido %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <div class="pie">
+            <div>
+                <h4>Cine Paradiso</h4>
+                <p>Viví los mejores estrenos en pantalla gigante. Sacá tus entradas hoy.</p>
+            </div>
+            <div>
+                <h4>Nuestras sedes</h4>
+                {% for nombre, direccion in sedes_cine %}
+                <p>{{ nombre }} - {{ direccion }}</p>
+                {% endfor %}
+            </div>
+            <div>
+                <h4>Redes</h4>
+                <p><a href="https://facebook.com" target="_blank">Facebook</a> - <a href="https://instagram.com" target="_blank">Instagram</a></p>
+                <p><a href="https://github.com" target="_blank">GitHub</a></p>
+            </div>
+        </div>
+        <p class="copy">&copy; 2026 Cine Paradiso - Introducción al Desarrollo de Software</p>
+    </footer>
+    <script src="{{ url_for('static', filename='js/a1.js') }}"></script>
+</body>
+</html>

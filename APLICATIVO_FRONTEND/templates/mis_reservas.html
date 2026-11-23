@@ -1,0 +1,50 @@
+
+{% extends "base.html" %}
+{% block titulo %}Mis reservas{% endblock %}
+{% block contenido %}
+
+<h1>Mis reservas</h1>
+
+{% if reservas %}
+<div class="tabla-scroll">
+    <table class="apilable">
+        <tr class="cabecera">
+            <th>Reserva</th>
+            <th>Funcion</th>
+            <th>Fecha de compra</th>
+            <th>Entradas</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>N°</th>
+            <th>Acciones</th>
+        </tr>
+
+        {% for r in reservas %}
+        <tr>
+            <td data-label="Reserva">{{ r.id_reserva }}</td>
+            <td data-label="Funcion">{{ r.id_funcion }}</td>
+            <td data-label="Fecha de compra">{{ r.fecha_de_compra }}</td>
+            <td data-label="Entradas">{{ r.cant_entradas }}</td>
+            <td data-label="Total">{{ r.monto_a_pagar | dinero }}</td>
+            <td data-label="Estado">{{ r.estado_compra }}</td>
+            <td data-label="N°">{{ r.qr }}</td>
+
+            <td data-label="Acciones">
+                {% if r.estado_compra == "reservada" %}
+                    <form method="POST" action="{{url_for('reserva_bp.cancelar', qr_id=r.qr)}}">
+                        <button type="submit">Cancelar</button>
+                    </form>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% else %}
+<p>Todavia no tenes reservas.</p>
+{% endif %}
+
+{% endblock %}
