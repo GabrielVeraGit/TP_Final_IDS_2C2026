@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titulo %}New admin{% endblock %}
+{% block contenido %}
+
+<h1>Ingresar nuevo email de administrador</h1>
+<form class="formulario" method="POST" action="{{ url_for('user_bp.new_admin') }}">
+    <input type="hidden" name="siguiente">
+    <label>New email <input type="email" name="new_email" required></label>
+    <label>Tu Contrasenia <input type="password" name="password" required></label>
+    <button type="submit">Registrar</button>
+</form>
+
+{% endblock %}

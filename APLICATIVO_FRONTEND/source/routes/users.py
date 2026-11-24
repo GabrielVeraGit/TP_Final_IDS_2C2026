@@ -66,3 +66,24 @@ def perfil():
 @user_bp.route("/admin", methods=["GET"])
 def admin():
     return redirect(url_for("index"))
+
+@user_bp.route("/new_admin", methods=["GET", "POST"])
+def new_admin():
+    acceso = utils.verificar_sesion("admin")
+    if acceso:
+        return acceso
+    
+    request_json=dict()
+    if request.method == "POST":
+        request_json["email"]=session["email"]
+        request_json["password"]=request.form.get("password")
+        request_json["new_email"]=request.form.get("new_email")
+        
+        error, respuesta, codigo = utils.llamar("POST", "/emails-admin", request_json)
+        if error:
+            return utils.manejar_error(respuesta, codigo, url_for('user_bp.new_admin'))
+
+        flash(f"Nuevo email admin {request_json["new_email"]} registrado!")
+        return redirect(url_for('user_bp.new_admin'))
+    else:
+        return render_template('new_admin.html')

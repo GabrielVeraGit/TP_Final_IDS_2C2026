@@ -42,10 +42,13 @@ def verificar_unicidad_email_usuarios(usr:dict):
 def encriptar_password(password):
     password_encriptada = generate_password_hash(password)
     return password_encriptada
-def verificar_igualdad_password(hash_password:str, password:str):
+def verificar_igualdad_password(hash_password:str, password:str, tipo_:str="login"):
     if check_password_hash(hash_password, password):
         return False, None
-    return True, ERROR_CLIENTE["UNAUTHORIZED"]("contrasenia incorrecta")
+    if tipo_=="login":
+        return True, ERROR_CLIENTE["UNAUTHORIZED"]("contrasenia incorrecta")
+    else:#formularios que piden el password para confirmar, y no cerrar sus sesion
+        return True, ERROR_CLIENTE["FORBIDDEN"]("contrasenia incorrecta")
 
 
 def obtener_perfil(identificador:str):
@@ -76,7 +79,7 @@ def obtener_usuario_login(usr:dict):
         return True, ERROR_CLIENTE["NOT_FOUND"]("El email no esta registrado")
     return False, resultado[0]
 
-def registrar_email_admin(datos:dict):
+def registrar_new_email_admin(datos:dict):
     error, resultado = validando_dominio_email(datos)
     if error:
         return True, resultado

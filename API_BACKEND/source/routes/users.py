@@ -93,10 +93,20 @@ def post_email_admin():
     error, resultado = extend_jwt.verificar_rol_permitido("admin")
     if error:
         return resultado
-    error, datos = val.validar_email_admin()
+
+    error, datos_json = val.validar_new_email_admin()
     if error:
-        return datos
-    error, resultado = serv.registrar_email_admin(datos)
+        return datos_json
+   
+    error, registro_usr = serv.obtener_usuario_login(datos_json)
+    if error:
+        return registro_usr
+ 
+    error, result = serv.verificar_igualdad_password(registro_usr["password"], datos_json["password"], tipo_="form")
+    if error:
+        return result
+      
+    error, resultado = serv.registrar_new_email_admin({"email":datos_json["new_email"]})
     if error:
         return resultado
     return jsonify({"message": "Email registrado como admin"}), 201
