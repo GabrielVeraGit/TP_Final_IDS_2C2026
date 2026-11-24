@@ -63,9 +63,6 @@ def perfil():
     
     return redirect(url_for("index"))
 
-@user_bp.route("/admin", methods=["GET"])
-def admin():
-    return redirect(url_for("index"))
 
 @user_bp.route("/new_admin", methods=["GET", "POST"])
 def new_admin():

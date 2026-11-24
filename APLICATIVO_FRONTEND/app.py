@@ -6,6 +6,7 @@ from source.config import SEDES
 from source.routes.users import user_bp
 from source.routes.peliculas import pelicula_bp
 from source.routes.reservas import reserva_bp
+from source.routes.backoffice import backoffice_bp
 #from source.admin import admin_bp
 #saquen el # cuando hayan creado el archivo y su bp!
 
@@ -17,6 +18,7 @@ app.secret_key = os.getenv("FRONT_SECRET_KEY", "clave_del_aplicativo_tp")
 app.register_blueprint(user_bp, url_prefix="/cine_paradiso")
 app.register_blueprint(pelicula_bp, url_prefix="/cine_paradiso")
 app.register_blueprint(reserva_bp, url_prefix="/cine_paradiso")
+app.register_blueprint(backoffice_bp, url_prefix="/cine_paradiso")
 
 #lo mismo aca
 app.add_template_filter(formato.filtro_fecha, "fecha")
@@ -46,10 +48,8 @@ def inyectar_seccion():
     seccion = "cartelera"
     if request.path == "/cine_paradiso":
         seccion = "inicio"
-    elif request.path.startswith("/cine_paradiso/admin"):
-        seccion = "admin"
-    elif request.path.endswith("/usar"):
-        seccion = "checkin"
+    elif request.path.startswith("/cine_paradiso/backoffice") or request.path.endswith("/new_admin") or request.path.endswith("/usar"):
+        seccion = "backoffice"
     elif request.path.startswith("/cine_paradiso/mis-reservas") or request.path.startswith("/cine_paradiso/comprar") or request.path.endswith("/cine_paradiso/cancelar"):
         seccion = "reservas"
     elif request.path.startswith("/cine_paradiso/perfil"):
