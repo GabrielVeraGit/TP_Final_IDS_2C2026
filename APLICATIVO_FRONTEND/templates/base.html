@@ -17,8 +17,8 @@
                 {% if session.get('token') %}
                 
                     {% if session.get('rol') == 'admin' %}
-                        <a href="{{ url_for('user_bp.admin') }}" class="{{ 'activo' if seccion == 'admin' }}">Backoffice</a>
-                        <a href="{{ url_for('reserva_bp.usar', qr_id='none')}}" class="{{ 'activo' if seccion == 'checkin' }}">Check-in</a>
+                        <a href="{{ url_for('backoffice_bp.backoffice') }}" class="{{ 'activo' if seccion == 'backoffice' }}">Backoffice</a>
+                        
                     {% else %}
                         <a href="{{ url_for('reserva_bp.mis_reservas') }}" class="{{ 'activo' if seccion == 'reservas' }}">Mis reservas</a>
                         <a href="{{url_for('user_bp.perfil')}}" class="{{ 'activo' if seccion == 'perfil' }}">Mi perfil</a>

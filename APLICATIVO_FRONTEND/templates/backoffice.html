@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Back Office{% endblock %}
+{% block contenido %}
+
+
+<p >Acciones:</p>
+    <ul>
+        <li><strong><a href="{{ url_for('reserva_bp.usar', qr_id='none') }}">CHECK-IN</a></strong></li>
+        <li><strong><a href="{{url_for('user_bp.new_admin')}}">Agregar nuevo email administrador</a></strong></li>
+   
+    </ul>
+
+<p>Resto de backoffice ...</p>
+
+{% endblock %}

@@ -40,14 +40,26 @@ def validar_login():
     error, password = validar_texto(body, "password", max_largo=100)
     if error:
         return True, password
+    
     return False, {"email": email, "password": password}
 
-def validar_email_admin():
+
+def validar_new_email_admin():
     body = request.get_json(silent=True)
     error, body = validar_body_json(body)
     if error:
         return True, body
+    
     error, email = validar_email(body, "email")
     if error:
         return True, email
-    return False, {"email": email}
+    
+    error, password = validar_texto(body, "password", max_largo=100)
+    if error:
+        return True, password
+    
+    error, new_email = validar_email(body, "new_email")
+    if error:
+        return True, email
+    
+    return False, {"email":email, "password": password, "new_email": new_email}
