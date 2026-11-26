@@ -60,6 +60,8 @@ CREATE TABLE IF NOT EXISTS RESERVAS (
     estado_compra ENUM('reservada', 'cancelada', 'usada') NOT NULL DEFAULT 'reservada',
     cant_entradas INT NOT NULL,
     monto_a_pagar DECIMAL(10,2) NOT NULL,
+    estado_pago ENUM('pendiente', 'pagada', 'vencida') NOT NULL DEFAULT 'pendiente',
+    fecha_pago DATETIME NULL,
     fecha_cancelacion DATETIME NULL,
     fecha_validacion DATETIME NULL,
     FOREIGN KEY (id_funcion) REFERENCES FUNCIONES(id_funcion) ON DELETE CASCADE,

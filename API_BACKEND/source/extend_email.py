@@ -35,7 +35,7 @@ def send_bienvenida(usr:dict):
 def send_reserva(qr_id:str, url_cancelar:str, qr_buffer, identificador:str, registro:dict):
     try:
         
-        msg = Message(subject=f"Reserva exitosa", recipients=[identificador,])
+        msg = Message(subject=f"Pago confirmado - tu entrada", recipients=[identificador,])
 
         msg.html=render_template('reserva.html',
                                 qr=qr_id, 
@@ -44,7 +44,8 @@ def send_reserva(qr_id:str, url_cancelar:str, qr_buffer, identificador:str, regi
                                 sala=registro["name_sala"], 
                                 sede=registro["name_sede"],
                                 direccion=registro["direccion_sede"],
-                                cant_entradas=registro["cant_entradas"] )
+                                cant_entradas=registro["cant_entradas"],
+                                monto=registro["monto_a_pagar"])
 
         msg.attach(
                     filename=f"{qr_id}.png",

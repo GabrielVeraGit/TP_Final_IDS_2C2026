@@ -1,5 +1,6 @@
 from source.db import ejecutar_instruccion, ejecutar_insercion
 from errors_code import ERROR_SERVIDOR
+from source.repositories import reservas as repo_reservas
 
 
 def armar_where_funciones(filtros:dict):
@@ -23,6 +24,9 @@ def armar_where_funciones(filtros:dict):
 
 
 def obtener_funciones(filtros:dict):
+    error, resultado = repo_reservas.vencer_pagos_pendientes()
+    if error:
+        return True, resultado
     where, valores = armar_where_funciones(filtros)
     query = f"""SELECT F.id_funcion, F.fecha_hora, F.precio_entrada,
                        P.id_pelicula, P.titulo, P.poster, P.duracion,
