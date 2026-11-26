@@ -5,8 +5,8 @@
     <title>Confirmación de Reserva</title>
 </head>
 <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-    <h2>¡Reserva Confirmada!</h2>
-    <p>Tu reserva ha sido registrada con los siguientes datos:</p>
+    <h2>¡Pago confirmado!</h2>
+    <p>Recibimos tu pago. Estos son los datos de tu compra:</p>
 
     <ul>
         <li><strong>Sede:</strong> {{ sede }}</li>
@@ -15,6 +15,8 @@
         <li><strong>Fecha y hora:</strong> {{ fecha_funcion }}</li>
         <li><strong>Código de reserva:</strong> {{ qr }}</li>
         <li><strong>Cantidad de entradas:</strong> {{ cant_entradas }}</li>
+        <li><strong>Total pagado:</strong> ${{ monto }}</li>
+
     </ul>
 
     <p>Presenta este código QR al ingresar:</p>

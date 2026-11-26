@@ -1,9 +1,29 @@
 from errors_code import ERROR_CLIENTE, ERROR_SERVIDOR
 from source.db import ejecutar_instruccion, ejecutar_transaccion
-from datetime import datetime
+from datetime import datetime, timedelta
+from source.utils import config
+
+#una reserva sin pagar a los MINUTOS_LIMITE_PAGO se cancela y el pago queda vencido (libera el cupo)
+def armar_query_vencer_pagos():
+    return """UPDATE RESERVAS SET estado_pago='vencida', estado_compra='cancelada', fecha_cancelacion=%s
+              WHERE estado_pago='pendiente' AND estado_compra='reservada' AND fecha_de_compra < %s;"""
+
+def armar_valores_vencer_pagos():
+    ahora = datetime.now()
+    return (ahora, ahora - timedelta(minutes=config.MINUTOS_LIMITE_PAGO))
+
+def vencer_pagos_pendientes():
+    try:
+        ejecutar_instruccion(armar_query_vencer_pagos(), armar_valores_vencer_pagos(), autocommit=True)
+        return False, None
+    except Exception as e:
+        return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB vencer_pagos_pendientes, {str(e)}")
 
 #filtros: clave=la columna filtro; valor=el dato filtro
 def obtener_reservas_filtros(filtros:dict=None)-> list[dict]:
+    error, resultado = vencer_pagos_pendientes()
+    if error:
+        return True, resultado
     query = "SELECT * FROM RESERVAS"
     if filtros:
         filtros_c = filtros.copy()
@@ -75,6 +95,7 @@ def insertar_reserva_con_cupo(cursor, datos:dict):
         return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"El id_funcion={datos['id_funcion']} no existe")
     funcion = funcion[0]
 
+    cursor.execute(armar_query_vencer_pagos(), armar_valores_vencer_pagos())
     cursor.execute("""
     SELECT COALESCE(SUM(cant_entradas), 0) AS ocupadas
     FROM RESERVAS
@@ -113,6 +134,15 @@ def actualizar_estado_reserva(registro: dict, qr_id: str, nuevo_estado: str, col
         return False, None
     except Exception as e:
         return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB actualizar_estado ({nuevo_estado}): {str(e)}")
+
+def pagar_reserva(registro: dict, qr_id: str):
+    query = """UPDATE RESERVAS SET estado_pago='pagada', fecha_pago=%s
+               WHERE id_reserva=%s AND qr=%s AND estado_pago='pendiente';"""
+    try:
+        ejecutar_instruccion(query, (datetime.now(), registro["id_reserva"], qr_id), autocommit=True)
+        return False, None
+    except Exception as e:
+        return True, ERROR_SERVIDOR["INTERNAL_SERVER_ERROR"](f"Error DB pagar_reserva: {str(e)}")
 
 
 

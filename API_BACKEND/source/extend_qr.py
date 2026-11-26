@@ -1,4 +1,5 @@
 import io
+import base64
 import uuid
 import qrcode
 from source.utils import config
@@ -22,12 +23,17 @@ def generar_qr_en_memoria(contenido_url: str):
     buffer.seek(0) 
     return buffer
 
+def generar_qr_base64(contenido_url: str):
+    buffer = generar_qr_en_memoria(contenido_url)
+    return base64.b64encode(buffer.read()).decode("utf-8")
 
+def generar_qr_id():
+    return f"QR_ID-{uuid.uuid4().hex[:10].upper()}"
 
-def generar_code_y_urls():
-    qr_id = f"QR_ID-{uuid.uuid4().hex[:10].upper()}"
-
-    url_usar = f"{config.URL_FRONTEND}/reservas/{qr_id}/usar" #va al qr
+def armar_urls(qr_id: str):
+    url_usar = f"{config.URL_FRONTEND}/reservas/{qr_id}/usar" #va al qr de la entrada
     url_cancelar = f"{config.URL_FRONTEND}/reservas/{qr_id}/cancelar" #va al boton
-    
-    return qr_id, url_usar, url_cancelar
+    url_pagar = f"{config.URL_FRONTEND}/reservas/{qr_id}/pagar" #va al qr de pago
+
+    return url_usar, url_cancelar, url_pagar
+

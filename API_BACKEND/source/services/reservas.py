@@ -56,16 +56,62 @@ def confirmando_reserva(body:dict):
     
     return False, registro
 
-
-def confirmando_cancelacion(qr_id:str):
+def buscar_reserva_del_cliente(qr_id:str):
     identificador, data_extra = extend_jwt.obtener_informacion_token()
     error, registro_re = repo.obtener_reservas_filtros({"id_usuario":data_extra["id_usuario"],"qr":qr_id})
     if error:
         return True, registro_re
-    
+
     if len(registro_re) == 0:
         return True, ERROR_CLIENTE["BAD_REQUEST"]("qr_id y el cliente no coinciden")
-    registro_re=registro_re[0]
+    return False, registro_re[0]
+
+
+def confirmando_pendiente_de_pago(qr_id:str):
+    error, registro_re = buscar_reserva_del_cliente(qr_id)
+    if error:
+        return True, registro_re
+
+    if registro_re["estado_pago"] == "vencida":
+        return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"El tiempo para pagar ({config.MINUTOS_LIMITE_PAGO} minutos) vencio, hace una nueva reserva")
+    if registro_re["estado_compra"] != "reservada":
+        return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"La reserva esta {registro_re['estado_compra']}, no es posible pagarla")
+    if registro_re["estado_pago"] == "pagada":
+        return True, ERROR_CLIENTE["CONFLICT"]("La reserva ya fue pagada")
+    return False, registro_re
+
+
+def calcular_segundos_restantes(registro_re:dict):
+    vence = registro_re["fecha_de_compra"] + timedelta(minutes=config.MINUTOS_LIMITE_PAGO)
+    segundos = int((vence - datetime.now()).total_seconds())
+    if segundos < 0:
+        return 0
+    return segundos
+
+
+def confirmando_pago(qr_id:str):
+    error, registro_re = confirmando_pendiente_de_pago(qr_id)
+    if error:
+        return True, registro_re
+
+    error, registro_fun = repo.obtener_funcion_relacional_salas_sede(registro_re["id_funcion"])
+    if error:
+        return True, registro_fun
+    registro_fun = registro_fun[0]
+
+    if datetime.now() >= registro_fun["fecha_hora"]:
+        return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"]("La funcion ya comenzo, no es posible pagar la reserva")
+
+    registro_fun["id_reserva"] = registro_re["id_reserva"]
+    registro_fun["cant_entradas"] = registro_re["cant_entradas"]
+    registro_fun["monto_a_pagar"] = registro_re["monto_a_pagar"]
+    return False, registro_fun
+
+
+def confirmando_cancelacion(qr_id:str):
+    error, registro_re = buscar_reserva_del_cliente(qr_id)
+    if error:
+        return True, registro_re
 
     if registro_re["estado_compra"] != "reservada":
         return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"La reserva esta {registro_re['estado_compra']}, no es posible cancelarlo")
@@ -96,6 +142,9 @@ def confirmando_uso(qr_id:str):
 
     if registro_re["estado_compra"] != "reservada":
         return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"](f"La reserva esta {registro_re['estado_compra']}, no es posible usarla")
+    if registro_re["estado_pago"] != "pagada":
+        return True, ERROR_CLIENTE["UNPROCESSABLE_ENTITY"]("La reserva todavia no fue pagada")
+
     
     error, registro_fun = repo.obtener_funcion_relacional_salas_sede(registro_re["id_funcion"])
     if error:
