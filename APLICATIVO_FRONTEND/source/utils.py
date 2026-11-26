@@ -16,6 +16,15 @@ def tomar_campos(origen, campos:tuple) -> dict:
             datos[campo] = valor
     return datos
 
+def generos_disponibles(peliculas:list) -> list:
+    generos = []
+    for p in peliculas:
+        for genero in (p.get("genero") or "").split(","):
+            genero = genero.strip()
+            if genero != "" and genero not in generos:
+                generos.append(genero)
+    generos.sort()
+    return generos
 
 def verificar_sesion(rol:str=None):
     if not token_sesion():

@@ -34,12 +34,25 @@ def index():
     redireccion = utils.verificar_sesion()
     if redireccion:
         return redireccion
-    params = utils.tomar_campos(request.args, ("titulo", "genero"))
-    error, peliculas, codigo = utils.llamar("GET", "/peliculas/cartelera", params=params)
+    params = utils.tomar_campos(request.args, ("titulo", "genero", "id_sede"))
+    error, todas, codigo = utils.llamar("GET", "/peliculas/cartelera")
     if error:
-        flash(peliculas, "error")
+        flash(todas, "error")
+        todas = []
         peliculas = []
-    return render_template("index.html", peliculas=peliculas, filtros=params)
+    elif params:
+        error, peliculas, codigo = utils.llamar("GET", "/peliculas/cartelera", params=params)
+        if error:
+            flash(peliculas, "error")
+            peliculas = []
+    else:
+        peliculas = todas
+    generos = utils.generos_disponibles(todas)
+    error, sedes, codigo = utils.llamar("GET", "/sedes")
+    if error:
+        flash(sedes, "error")
+        sedes = []
+    return render_template("index.html", peliculas=peliculas, filtros=params, sedes=sedes, generos=generos)
 
 
 
