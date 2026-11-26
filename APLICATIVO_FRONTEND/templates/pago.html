@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block titulo %}Pagar reserva{% endblock %}
+{% block contenido %}
+
+<h1>Pagar reserva</h1>
+
+<div class="caja centrado">
+    <p>Reserva <strong>{{ reserva.qr }}</strong></p>
+    <p>{{ reserva.cant_entradas }} entrada(s) - Total: <span class="precio">{{ reserva.monto_a_pagar | dinero }}</span></p>
+    <p class="gris">Escanea el QR con tu celular para pagar.</p>
+    <p>Tenes <strong id="cuenta" data-segundos="{{ qr.segundos_restantes }}">{{ qr.segundos_restantes // 60 }}:{{ '%02d' % (qr.segundos_restantes % 60) }}</strong> para pagar.</p>
+    <img class="qr" src="data:image/png;base64,{{ qr.qr_base64 }}" alt="QR de pago">
+    <a class="boton verde" href="data:image/png;base64,{{ qr.qr_base64 }}" download="pago-{{ reserva.qr }}.png">Descargar QR</a>
+    <a class="boton gris-b" href="{{ url_for('reserva_bp.mis_reservas') }}">Pagar despues</a>
+</div>
+
+{% endblock %}

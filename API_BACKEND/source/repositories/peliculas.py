@@ -6,8 +6,13 @@ def obtener_peliculas(filtros:dict, solo_cartelera:bool=False):
     query = "SELECT DISTINCT P.* FROM PELICULAS P"
     condiciones = []
     valores = []
-    if solo_cartelera:
+    if solo_cartelera or filtros["id_sede"]:
         query = f"{query} JOIN FUNCIONES F ON F.id_pelicula = P.id_pelicula"
+    if filtros["id_sede"]:
+        query = f"{query} JOIN SALAS S ON S.id_sala = F.id_sala"
+        condiciones.append("S.id_sede = %s")
+        valores.append(filtros["id_sede"])
+    if solo_cartelera:
         condiciones.append("F.fecha_hora > NOW()")
         condiciones.append("(P.disponible_desde IS NULL OR P.disponible_desde <= NOW())")
         condiciones.append("(P.disponible_hasta IS NULL OR P.disponible_hasta >= NOW())")

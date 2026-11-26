@@ -50,7 +50,11 @@ def inyectar_seccion():
         seccion = "inicio"
     elif request.path.startswith("/cine_paradiso/backoffice") or request.path.endswith("/new_admin") or request.path.endswith("/usar"):
         seccion = "backoffice"
-    elif request.path.startswith("/cine_paradiso/mis-reservas") or request.path.startswith("/cine_paradiso/comprar") or request.path.endswith("/cine_paradiso/cancelar"):
+    elif (request.path.startswith("/cine_paradiso/mis-reservas")
+          or request.path.startswith("/cine_paradiso/comprar")
+          or request.path.endswith("/pago")
+          or request.path.endswith("/pagar")
+          or request.path.endswith("/cine_paradiso/cancelar")):
         seccion = "reservas"
     elif request.path.startswith("/cine_paradiso/perfil"):
         seccion = "perfil"

@@ -50,3 +50,23 @@ if (cantidad) {
         document.getElementById("total-final").textContent = "$ " + texto;
     });
 }
+
+// en el pago, cuenta regresiva hasta que vence el QR 
+var cuenta = document.getElementById("cuenta");
+if (cuenta) {
+    var restantes = parseInt(cuenta.getAttribute("data-segundos"));
+    var reloj = setInterval(function () {
+        restantes = restantes - 1;
+        if (restantes <= 0) {
+            clearInterval(reloj);
+            location.reload();
+            return;
+        }
+        var minutos = Math.floor(restantes / 60);
+        var segundos = restantes % 60;
+        if (segundos < 10) {
+            segundos = "0" + segundos;
+        }
+        cuenta.textContent = minutos + ":" + segundos;
+    }, 1000);
+}

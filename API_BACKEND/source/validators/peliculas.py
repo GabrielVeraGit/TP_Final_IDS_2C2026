@@ -45,4 +45,7 @@ def validar_filtros_peliculas():
     error, genero = validar_texto(request.args, "genero", obligatorio=False, max_largo=50)
     if error:
         return True, genero
-    return False, {"titulo": titulo, "genero": genero}
+    error, id_sede = validar_entero(request.args, "id_sede", obligatorio=False, minimo=1)
+    if error:
+        return True, id_sede
+    return False, {"titulo": titulo, "genero": genero, "id_sede": id_sede}
