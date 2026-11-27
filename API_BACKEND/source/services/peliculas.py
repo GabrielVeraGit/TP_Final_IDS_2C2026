@@ -2,7 +2,7 @@ import requests
 from errors_code import ERROR_CLIENTE, ERROR_SERVIDOR
 from source.utils import config
 from source.repositories import peliculas as repo
-
+from source import extend_deepl
 def listar_peliculas(filtros:dict, solo_cartelera:bool=False):
     return repo.obtener_peliculas(filtros, solo_cartelera)
 
@@ -27,7 +27,7 @@ def consultar_omdb(titulo:str, anio:int=None):
         return True, ERROR_CLIENTE["NOT_FOUND"](f"OMDb: {datos.get('Error', 'pelicula no encontrada')}")
     return False, datos
 
-def convertir_formato_omdb(datos:dict, disponibilidad:dict):
+def convertir_formato_omdb(datos:dict, disponibilidad:dict, sinopsis_traducida:str):
     return {
         "titulo": datos["Title"],
         "anio": int(datos["Year"][:4]),#a veces viene "2019-" (series)
@@ -36,7 +36,7 @@ def convertir_formato_omdb(datos:dict, disponibilidad:dict):
         "genero": datos.get("Genre"),
         "director": datos.get("Director"),
         "actores": datos.get("Actors"),
-        "sinopsis": datos.get("Plot"),
+        "sinopsis":  sinopsis_traducida,
         "lenguaje": datos.get("Language"),
         "poster": datos.get("Poster"),
         "omdb_id": datos["imdbID"],
@@ -48,7 +48,12 @@ def importar_pelicula(datos:dict):
     error, resultado = consultar_omdb(datos["titulo"], datos["anio"])
     if error:
         return True, resultado
-    pelicula = convertir_formato_omdb(resultado, datos)
+    
+    error, text_traducido = extend_deepl.consumir_api_deepl(resultado.get("Plot"))
+    if error:
+        return True, text_traducido
+    
+    pelicula = convertir_formato_omdb(resultado, datos, text_traducido)
 
     error, existentes = repo.obtener_pelicula_por_omdb(pelicula["omdb_id"])
     if error:
@@ -88,3 +93,18 @@ def eliminar_pelicula(id_pelicula:int):
     if cantidad > 0:
         return True, ERROR_CLIENTE["CONFLICT"]("La pelicula tiene funciones programadas, no se puede eliminar (modifique su disponibilidad para sacarla de cartelera)")
     return repo.eliminar_pelicula(id_pelicula)
+
+
+def buscar_pelicula_omdb(datos:dict):
+    error, resultado = consultar_omdb(datos["titulo"])
+    if error:
+        return True, resultado
+    error, text_traducido = extend_deepl.consumir_api_deepl(resultado.get("Plot"))
+    if error:
+        return True, text_traducido
+    
+    dispo={"disponible_desde":"", "disponible_hasta":""}
+    pelicula = convertir_formato_omdb(resultado, dispo, text_traducido)
+    
+
+    return False, pelicula

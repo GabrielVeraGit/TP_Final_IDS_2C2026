@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block titulo %}Agregar pelicula{% endblock %}
+{% block contenido %}
+
+
+    {% if pelicula %}
+        <div class="detalle">
+            {% if pelicula.poster and pelicula.poster.startswith('http') %}
+            <img src="{{ pelicula.poster }}" alt="Poster de {{ pelicula.titulo }}">
+            {% endif %}
+            <div>
+                <h1>{{ pelicula.titulo }} ({{ pelicula.anio }})</h1>
+                <p class="chico">{{ pelicula.genero }} | {{ pelicula.duracion }} | {{ pelicula.clasificacion }}</p>
+                <p><b>Director:</b> {{ pelicula.director }}</p>
+                <p><b>Actores:</b> {{ pelicula.actores }}</p>
+                <p><b>omdb_id:</b> {{ pelicula.omdb_id }}</p>
+                <p>{{ pelicula.sinopsis }}</p>
+            </div>
+        </div>
+
+        <form action="{{ url_for('backoffice_bp.agregar_pelicula') }}" method="POST">
+                <input type="hidden" name="titulo" value="{{ pelicula.titulo }}">
+                <input type="hidden" name="anio" value="{{ pelicula.anio }}">
+
+                <label>Disponible desde:
+                    <input type="date" name="disponible_desde" required>
+                </label>
+
+                <label>Disponible hasta:
+                    <input type="date" name="disponible_hasta" required>
+                </label>
+
+                <button class="verde" type="submit">Confirmar</button>
+        </form>
+
+        <form class="en-linea" action="{{ url_for('backoffice_bp.agregar_pelicula') }}" method="GET">
+            <button type="submit">Regresar</button>
+        </form>
+    {%else%}
+        <h2>Ingrese el titulo o descripcion de la pelicula que quiere</h2>
+    
+        <form action="{{ url_for('backoffice_bp.agregar_pelicula') }}" method="GET">
+            <label>Título o descripción de la película: 
+                <input type="text" name="descripcion_pelicula" required>
+            </label>
+            <button class="verde" type="submit">Buscar</button>
+        </form>
+    {% endif %}
+
+
+
+
+
+{% endblock %}

@@ -49,3 +49,13 @@ def validar_filtros_peliculas():
     if error:
         return True, id_sede
     return False, {"titulo": titulo, "genero": genero, "id_sede": id_sede}
+
+def validar_busqueda_pelicula():
+    body = request.get_json(silent=True)
+    error, body = validar_body_json(body)
+    if error:
+        return True, body
+    error, resp = validar_texto(body, "descripcion", max_largo=200)
+    if error:
+        return True, resp
+    return False, resp
