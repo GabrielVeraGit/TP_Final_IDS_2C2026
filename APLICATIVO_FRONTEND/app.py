@@ -69,8 +69,6 @@ def inyectar_seccion():
           or request.path.endswith("/pagar")
           or request.path.endswith("/cine_paradiso/cancelar")):
         seccion = "reservas"
-    elif request.path.startswith("/cine_paradiso/perfil"):
-        seccion = "perfil"
     return dict(seccion=seccion, sedes_cine=SEDES)
 
 if __name__ == "__main__":
