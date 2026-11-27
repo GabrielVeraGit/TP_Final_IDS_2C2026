@@ -86,15 +86,16 @@ def mis_reservas():
         return utils.manejar_error(respuesta, codigo, url_for('index'))
 
     reservas = respuesta.get("registros", [])
-    error, respuesta, codigo = utils.llamar("GET", "/user/perfil")
 
+    error, respuesta, codigo = utils.llamar("GET", "/user/perfil")
     if error:
+
         return utils.manejar_error(respuesta, codigo, url_for('index'))
 
     usuario = respuesta.get("usuario", {})
 
 
-    return render_template("mis_reservas.html", reservas=reservas)
+    return render_template("mis_reservas.html", reservas=reservas, usuario=usuario)
 
 
 @reserva_bp.route("/reservas/<string:qr_id>/cancelar", methods=["GET","POST"])
