@@ -58,10 +58,6 @@ def logout():
     return redirect(url_for("index"))
 
 
-@user_bp.route("/perfil", methods=["GET"])
-def perfil():
-    
-    return redirect(url_for("index"))
 
 
 @user_bp.route("/new_admin", methods=["GET", "POST"])

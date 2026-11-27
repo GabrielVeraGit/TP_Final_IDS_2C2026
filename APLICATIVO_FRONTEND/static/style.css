@@ -152,6 +152,7 @@ footer { background: var(--tarjeta); border-top: 1px solid var(--borde); color: 
     .formulario { max-width: 100%; }
     table.apilable, table.apilable tbody, table.apilable tr, table.apilable td { display: block; width: 100%; }
     table.apilable thead { display: none; }
+    table.apilable tr.cabecera { display: none; }
     table.apilable { background: none; }
     table.apilable tr { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 8px; margin-bottom: 10px; }
     table.apilable td { border: none; border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; gap: 10px; text-align: right; overflow-wrap: anywhere; }
