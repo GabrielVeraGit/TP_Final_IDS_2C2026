@@ -15,6 +15,7 @@
     
     <p>Reserva: {{qr_id}}</p>
     <p >Estado: {{registros["estado_compra"].upper()}}</p>
+    <p >Pago: {{registros["estado_pago"].upper()}}</p>
     <ul>
         <li><strong>ID :</strong> {{ registros["id_reserva"] }}</li>
         <li><strong>ID FUNCION:</strong> {{ registros["id_funcion"] }}</li>
@@ -22,7 +23,7 @@
         <li><strong>FECHA HORA COMPRA:</strong> {{ registros["fecha_de_compra"] }}</li>
         <li><strong>CANTIDAD ENTRADAS:</strong> {{ registros["cant_entradas"] }}</li>
     </ul>
-    {%if registros["estado_compra"] not in ("cancelada","usada")%}
+    {%if registros["estado_compra"] not in ("cancelada","usada") and registros["estado_pago"] == "pagada"%}
         <form class="en-linea" action="{{ url_for('reserva_bp.usar', qr_id=qr_id) }}" method="POST">
             <button class="verde" type="submit">Confirmar Check-In</button>
         </form>

@@ -15,6 +15,7 @@
             <th>Entradas</th>
             <th>Total</th>
             <th>Estado</th>
+            <th>Pago</th>
             <th>N°</th>
             <th>Acciones</th>
         </tr>
@@ -27,10 +28,14 @@
             <td data-label="Entradas">{{ r.cant_entradas }}</td>
             <td data-label="Total">{{ r.monto_a_pagar | dinero }}</td>
             <td data-label="Estado">{{ r.estado_compra }}</td>
+            <td data-label="Pago">{{ r.estado_pago }}</td>
             <td data-label="N°">{{ r.qr }}</td>
 
             <td data-label="Acciones">
                 {% if r.estado_compra == "reservada" %}
+                    {% if r.estado_pago == "pendiente" %}
+                        <a class="boton verde chico" href="{{ url_for('reserva_bp.pago', qr_id=r.qr) }}">Pagar</a>
+                    {% endif %}
                     <form method="POST" action="{{url_for('reserva_bp.cancelar', qr_id=r.qr)}}">
                         <button type="submit">Cancelar</button>
                     </form>

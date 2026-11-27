@@ -31,7 +31,48 @@ def comprar(id_funcion):
         return utils.manejar_error(respuesta, codigo, url_for('index'))
 
     flash(respuesta.get("message", "Reserva realizada correctamente"), "success")
-    return redirect(url_for('index'))
+    return redirect(url_for('reserva_bp.pago', qr_id=respuesta["qr_id"]))
+
+@reserva_bp.route("/reservas/<string:qr_id>/pago", methods=["GET"])
+def pago(qr_id):
+    acceso = utils.verificar_sesion("cliente")
+    if acceso:
+        return acceso
+
+    error, respuesta, codigo = utils.llamar("GET", "/reservas", params={"qr": qr_id})
+    if error:
+        return utils.manejar_error(respuesta, codigo, url_for('reserva_bp.mis_reservas'))
+    if len(respuesta["registros"]) == 0:
+        return utils.manejar_error("No existe esa reserva", 404, url_for('reserva_bp.mis_reservas'))
+    reserva = respuesta["registros"][0]
+
+    if reserva["estado_pago"] == "vencida":
+        flash("El tiempo para pagar vencio, hace una nueva reserva", "error")
+        return redirect(url_for('reserva_bp.mis_reservas'))
+    if reserva["estado_compra"] != "reservada" or reserva["estado_pago"] == "pagada":
+        flash("Esta reserva no esta pendiente de pago", "error")
+        return redirect(url_for('reserva_bp.mis_reservas'))
+
+    error, datos_qr, codigo = utils.llamar("GET", f"/reservas/{qr_id}/qr-pago")
+    if error:
+        return utils.manejar_error(datos_qr, codigo, url_for('reserva_bp.mis_reservas'))
+
+    return render_template("pago.html", reserva=reserva, qr=datos_qr)
+
+
+@reserva_bp.route("/reservas/<string:qr_id>/pagar", methods=["GET"])
+def pagar(qr_id):
+    """Es la url que abre el QR de pago: al escanearlo se hace este GET"""
+    acceso = utils.verificar_sesion("cliente")
+    if acceso:
+        return acceso
+
+    error, respuesta, codigo = utils.llamar("PUT", f"/reservas/{qr_id}/pagar")
+    if error:
+        return utils.manejar_error(respuesta, codigo, url_for('reserva_bp.mis_reservas'))
+
+    flash(respuesta.get("message", "Pago registrado"), "success")
+    return redirect(url_for('reserva_bp.mis_reservas'))
 
 @reserva_bp.route("/mis-reservas", methods=["GET"])
 def mis_reservas():
