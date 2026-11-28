@@ -70,3 +70,14 @@ if (cuenta) {
         cuenta.textContent = minutos + ":" + segundos;
     }, 1000);
 }
+
+var fechas = document.querySelectorAll('input[type="date"]');//solo ingresan la fecha por calendario
+for (var i = 0; i < fechas.length; i++) {
+    fechas[i].style.cursor = "pointer";
+    fechas[i].onclick = function () {
+        this.showPicker();
+    };
+    fechas[i].onkeydown = function () {
+        return false;
+    };
+}

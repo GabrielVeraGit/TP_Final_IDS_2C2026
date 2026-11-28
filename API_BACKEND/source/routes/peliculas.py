@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from source import extend_jwt
+from source import extend_jwt, extend_gemini
 from source.validators import peliculas as val
 from source.services import peliculas as serv
 
@@ -75,3 +75,22 @@ def delete_pelicula(id_pelicula:int):
     if error:
         return resultado
     return jsonify({"message": "Pelicula eliminada"}), 200
+
+@pelicula_bp.route('/buscar_pelicula', methods=['GET'])
+@extend_jwt.seguro()
+def buscar_pelicula():
+    error, resultado = extend_jwt.verificar_rol_permitido("admin")
+    if error:
+        return resultado
+    error, descripcion = val.validar_busqueda_pelicula()
+    if error:
+        return descripcion
+    error, resultado_gm = extend_gemini.consumir_api_gemini(descripcion_peli=descripcion)
+    if error:
+        return resultado_gm
+    
+    datos_peli={"titulo":resultado_gm["titulo_original"]}
+    error, resultado_omdb = serv.buscar_pelicula_omdb(datos_peli)
+    if error:
+        return resultado_omdb
+    return jsonify(resultado_omdb), 200
